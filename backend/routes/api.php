@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\EventController;
+use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}/download', [TicketController::class, 'download']);
     });
 
+    // Payment routes
+    Route::prefix('payments')->group(function () {
+        Route::post('/initiate', [PaymentController::class, 'initiatePayment']);
+        Route::post('/status', [PaymentController::class, 'checkPaymentStatus']);
+        Route::post('/confirm', [PaymentController::class, 'confirmPayment']);
+        Route::post('/cancel', [PaymentController::class, 'cancelPayment']);
+        Route::get('/history', [PaymentController::class, 'paymentHistory']);
+    });
+
     // Contact/Support route
     Route::post('/contact', function (Request $request) {
         // Simple contact endpoint - in real implementation, this would send email
@@ -93,6 +103,17 @@ Route::get('/health', function () {
     return response()->json([
         'status' => 'success',
         'message' => 'EasyPass API is running',
+        'timestamp' => now(),
+    ]);
+});
+
+// Test payment endpoint (public - for debugging only)
+Route::post('/test-payment', function (Request $request) {
+    \Log::info('Test payment request received', $request->all());
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Test payment endpoint working',
+        'received_data' => $request->all(),
         'timestamp' => now(),
     ]);
 });

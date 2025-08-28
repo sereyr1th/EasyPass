@@ -67,7 +67,7 @@
                 <div class="grid grid-cols-1 gap-4">
                   <div class="flex justify-between">
                     <span class="text-gray-400">Date & Time:</span>
-                    <span class="text-white">{{ formatDate(ticket.event?.event_date) }}</span>
+                    <span class="text-white">{{ ticket.event?.event_date ? formatDate(ticket.event.event_date) : 'TBD' }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-400">Location:</span>
@@ -75,7 +75,7 @@
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-400">Price:</span>
-                    <span class="text-white">{{ ticket.event?.price > 0 ? `$${ticket.event?.price}` : 'Free' }}</span>
+                    <span class="text-white">{{ (ticket.event?.price ?? 0) > 0 ? `$${ticket.event?.price}` : 'Free' }}</span>
                   </div>
                 </div>
               </div>
@@ -134,19 +134,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import { useTicketsStore } from '@/stores/tickets'
+import { useTicketsStore, type Ticket } from '@/stores/tickets'
 
 const route = useRoute()
 const router = useRouter()
 const ticketsStore = useTicketsStore()
 
 const loading = ref(true)
-const ticket = ref(null)
+const ticket = ref<Ticket | null>(null)
 
 const canCancel = computed(() => {
   if (!ticket.value || ticket.value.status !== 'valid') return false
   
-  const eventDate = new Date(ticket.value.event?.event_date)
+  if (!ticket.value.event?.event_date) return false
+  
+  const eventDate = new Date(ticket.value.event.event_date)
   const hoursUntilEvent = (eventDate.getTime() - Date.now()) / (1000 * 60 * 60)
   return hoursUntilEvent > 24
 })
@@ -164,6 +166,8 @@ const formatDate = (dateString: string) => {
 }
 
 const cancelTicket = async () => {
+  if (!ticket.value) return
+  
   if (confirm('Are you sure you want to cancel this ticket? This action cannot be undone.')) {
     const result = await ticketsStore.cancelTicket(ticket.value.id)
     if (result.success) {

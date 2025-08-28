@@ -1,82 +1,117 @@
 <template>
-  <div class="min-h-screen bg-gray-900 py-8">
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="min-vh-100 position-relative overflow-hidden validate-page" style="padding-top: 100px;">
+    <!-- Animated Background -->
+    <div class="position-absolute w-100 h-100 top-0 start-0" style="z-index: -1;">
+      <div class="position-absolute w-100 h-100 validate-background"></div>
+      <div class="position-absolute w-100 h-100 top-0 start-0 validate-overlay"></div>
+      <div class="position-absolute top-0 start-0 w-100 h-100">
+        <div class="floating-particles">
+          <div class="particle particle-1"></div>
+          <div class="particle particle-2"></div>
+          <div class="particle particle-3"></div>
+          <div class="particle particle-4"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container position-relative" style="z-index: 2; max-width: 900px;">
       <!-- Header -->
-      <div class="text-center mb-8">
-        <QrCodeIcon class="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h1 class="text-4xl font-bold text-white mb-4">Validate Ticket</h1>
-        <p class="text-gray-300 text-lg">
+      <div class="text-center mb-5">
+        <div class="position-relative d-inline-block mb-4">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-4 mx-auto glow-animation shadow-lg" 
+               style="width: 100px; height: 100px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <i class="bi bi-qr-code-scan display-5 text-white"></i>
+          </div>
+          <div class="position-absolute top-0 start-0 w-100 h-100 rounded-4 glow-ring"></div>
+        </div>
+        <h1 class="display-3 fw-bold text-light mb-3 professional-title">Validate Ticket</h1>
+        <p class="lead text-light opacity-75 mb-0" style="font-size: 1.25rem;">
           Scan QR code or enter ticket number to validate entry
         </p>
       </div>
 
       <!-- Validation Form -->
-      <div class="card p-8 mb-8">
-        <form @submit.prevent="validateTicket" class="space-y-6">
-          <!-- Error Message -->
-          <div v-if="ticketsStore.error" class="bg-red-900/50 border border-red-700 rounded-lg p-4">
-            <div class="flex">
-              <ExclamationTriangleIcon class="w-5 h-5 text-red-400 mr-2 flex-shrink-0 mt-0.5" />
-              <p class="text-red-300 text-sm">{{ ticketsStore.error }}</p>
+      <div class="card border-0 shadow-lg mb-5" style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.05);">
+        <div class="card-body p-5">
+          <form @submit.prevent="validateTicket">
+            <!-- Error Message -->
+            <div v-if="ticketsStore.error" class="alert alert-danger d-flex align-items-center mb-4">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <div>{{ ticketsStore.error }}</div>
             </div>
-          </div>
 
-          <!-- Ticket Number Input -->
-          <div>
-            <label for="ticketNumber" class="form-label">Ticket Number</label>
-            <div class="relative">
-              <TicketIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                id="ticketNumber"
-                v-model="ticketNumber"
-                type="text"
-                placeholder="Enter ticket number (e.g., EP-ABC123)"
-                class="form-input pl-10 text-center font-mono"
-                required
-                :disabled="ticketsStore.loading"
-              />
+            <!-- Ticket Number Input -->
+            <div class="mb-4">
+              <label for="ticketNumber" class="form-label text-light fw-semibold fs-5">Ticket Number</label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text bg-transparent border-secondary">
+                  <i class="bi bi-ticket-perforated text-primary fs-4"></i>
+                </span>
+                <input
+                  id="ticketNumber"
+                  v-model="ticketNumber"
+                  type="text"
+                  placeholder="Enter ticket number (e.g., EP-ABC123)"
+                  class="form-control form-control-lg bg-transparent border-secondary text-light text-center fw-bold"
+                  style="font-family: 'Courier New', monospace; letter-spacing: 2px;"
+                  required
+                  :disabled="ticketsStore.loading"
+                />
+              </div>
             </div>
-          </div>
 
-          <!-- Submit Button -->
-          <button
-            type="submit"
-            :disabled="ticketsStore.loading || !ticketNumber.trim()"
-            class="btn btn-primary w-full flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div v-if="ticketsStore.loading" class="spinner mr-2"></div>
-            <CheckCircleIcon v-else class="w-5 h-5 mr-2" />
-            {{ ticketsStore.loading ? 'Validating...' : 'Validate Ticket' }}
-          </button>
-        </form>
+            <!-- Submit Button -->
+            <div class="d-grid gap-2 mb-4">
+              <button
+                type="submit"
+                :disabled="ticketsStore.loading || !ticketNumber.trim()"
+                class="btn btn-success btn-lg d-flex align-items-center justify-content-center position-relative overflow-hidden"
+                style="min-height: 60px;"
+              >
+                <div class="position-absolute w-100 h-100 top-0 start-0 bg-gradient" 
+                     style="background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%); 
+                            animation: shimmer 2s infinite;"></div>
+                <div v-if="ticketsStore.loading" class="spinner-border spinner-border-sm me-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <i v-else class="bi bi-check-circle me-2 fs-5"></i>
+                {{ ticketsStore.loading ? 'Validating...' : 'Validate Ticket' }}
+              </button>
+            </div>
 
-        <!-- QR Code Scanner Button -->
-        <div class="mt-6 pt-6 border-t border-gray-700">
-          <button
-            @click="openQRScanner"
-            class="btn btn-outline w-full flex justify-center items-center"
-          >
-            <CameraIcon class="w-5 h-5 mr-2" />
-            Scan QR Code
-          </button>
+            <!-- QR Code Scanner Button -->
+            <div class="pt-4 border-top border-secondary">
+              <button
+                type="button"
+                @click="openQRScanner"
+                class="btn btn-outline-light btn-lg w-100 d-flex align-items-center justify-content-center"
+              >
+                <i class="bi bi-camera me-2 fs-5"></i>
+                Scan QR Code
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
       <!-- Validation Result -->
-      <div v-if="ticketsStore.validationResult" class="space-y-6">
+      <div v-if="ticketsStore.validationResult" class="mb-5">
         <!-- Success Result -->
-        <div v-if="validationSuccess" class="card border-green-700 bg-green-900/20">
-          <div class="card-header">
-            <div class="flex items-center">
-              <CheckCircleIcon class="w-8 h-8 text-green-400 mr-3" />
+        <div v-if="validationSuccess" class="card border-0 shadow-lg" style="backdrop-filter: blur(10px); background: rgba(34, 197, 94, 0.1); border: 2px solid rgba(34, 197, 94, 0.3) !important;">
+          <div class="card-header bg-transparent border-bottom border-success">
+            <div class="d-flex align-items-center">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-3 me-3" 
+                   style="width: 60px; height: 60px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
+                <i class="bi bi-check-circle text-white fs-3"></i>
+              </div>
               <div>
-                <h3 class="text-xl font-semibold text-white">Ticket Valid!</h3>
-                <p class="text-green-300">Entry approved</p>
+                <h3 class="text-light fw-bold mb-1">Ticket Valid!</h3>
+                <p class="text-success mb-0">Entry approved</p>
               </div>
             </div>
           </div>
           
-          <div class="card-body space-y-4">
+          <div class="card-body p-4">
             <!-- Event Info -->
             <div>
               <h4 class="font-medium text-white mb-2">Event Details</h4>
@@ -158,14 +193,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useTicketsStore } from '@/stores/tickets'
-import {
-  QrCodeIcon,
-  TicketIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  CameraIcon,
-  ExclamationTriangleIcon
-} from '@heroicons/vue/24/outline'
 
 const ticketsStore = useTicketsStore()
 const ticketNumber = ref('')
@@ -203,3 +230,203 @@ const formatDate = (dateString: string) => {
   }).format(date)
 }
 </script>
+
+<style scoped>
+/* Validate page background */
+.validate-background {
+  background-image: url('@/assets/images/concert-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  filter: blur(2px);
+}
+
+.validate-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(16, 185, 129, 0.3) 30%,
+    rgba(5, 150, 105, 0.4) 70%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+  backdrop-filter: blur(1px);
+}
+
+/* Floating particles animation */
+.floating-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.1) 100%);
+  border-radius: 50%;
+  animation: floatParticle 8s ease-in-out infinite;
+}
+
+.particle-1 {
+  width: 30px;
+  height: 30px;
+  top: 20%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.particle-2 {
+  width: 20px;
+  height: 20px;
+  top: 70%;
+  right: 20%;
+  animation-delay: 2s;
+}
+
+.particle-3 {
+  width: 40px;
+  height: 40px;
+  bottom: 30%;
+  left: 10%;
+  animation-delay: 4s;
+}
+
+.particle-4 {
+  width: 25px;
+  height: 25px;
+  top: 40%;
+  right: 10%;
+  animation-delay: 6s;
+}
+
+@keyframes floatParticle {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) rotate(90deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px) rotate(180deg);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(-30px) translateX(5px) rotate(270deg);
+    opacity: 0.4;
+  }
+}
+
+/* Glow ring animation */
+.glow-ring {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, rgba(5, 150, 105, 0.4) 100%);
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+/* Button shimmer animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Enhanced form styling */
+.form-control:focus,
+.form-select:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.input-group-text {
+  border-color: #6b7280 !important;
+}
+
+/* Card glass effect */
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Professional title styling */
+.professional-title {
+  background: linear-gradient(135deg, #ffffff 0%, #e5e7eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced glow animation */
+.glow-animation {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-animation::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #10b981, #059669, #10b981);
+  border-radius: inherit;
+  z-index: -1;
+  animation: rotate 2s linear infinite;
+  opacity: 0.7;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Success card animation */
+.card[style*="rgba(34, 197, 94"] {
+  animation: successPulse 2s ease-in-out infinite;
+}
+
+@keyframes successPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .validate-background {
+    background-attachment: scroll;
+  }
+}
+</style>

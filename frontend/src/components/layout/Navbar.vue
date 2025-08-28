@@ -1,267 +1,157 @@
 <template>
-  <nav class="fixed top-0 left-0 right-0 z-50 bg-dark-900/95 backdrop-blur-md border-b border-dark-700/50 shadow-dark-lg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo and Brand -->
-        <div class="flex items-center">
-          <RouterLink to="/" class="flex items-center space-x-3 group">
-            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 group-hover:scale-110">
-              <span class="text-white font-bold text-xl">E</span>
-            </div>
-            <span class="text-2xl font-black text-white group-hover:text-primary-400 transition-colors duration-300 tracking-tight font-poppins">EasyPass</span>
-          </RouterLink>
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
+      <!-- Logo and Brand -->
+      <RouterLink to="/" class="navbar-brand d-flex align-items-center text-decoration-none">
+        <div class="position-relative me-3">
+          <img src="/src/assets/images/logo.svg" alt="EasyPass Logo" style="width: 50px; height: 35px;" class="glow-animation">
         </div>
+        <div class="d-flex flex-column">
+          <span class="fs-4 fw-bold text-light professional-title">EasyPass</span>
+          <small class="text-muted fw-medium" style="font-size: 0.7rem; letter-spacing: 0.1em;">EVENT MANAGEMENT</small>
+        </div>
+      </RouterLink>
 
-        <!-- Desktop Navigation -->
-        <div class="hidden md:block">
-          <div class="ml-10 flex items-baseline space-x-4">
+      <!-- Mobile toggle button -->
+      <button 
+        class="navbar-toggler" 
+        type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav" 
+        aria-expanded="false" 
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Navigation items -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item">
             <RouterLink
               to="/"
               class="nav-link"
-              :class="{ 'nav-link-active': $route.path === '/' }"
+              :class="{ 'active': $route.path === '/' }"
             >
-              Home
+              <i class="bi bi-house-door me-2"></i>Home
             </RouterLink>
+          </li>
+          <li class="nav-item">
             <RouterLink
               to="/events"
               class="nav-link"
-              :class="{ 'nav-link-active': $route.path.startsWith('/events') }"
+              :class="{ 'active': $route.path.startsWith('/events') }"
             >
-              Events
+              <i class="bi bi-calendar-event me-2"></i>Events
             </RouterLink>
+          </li>
+          <li class="nav-item" v-if="authStore.isAuthenticated">
             <RouterLink
-              v-if="authStore.isAuthenticated"
               to="/tickets"
               class="nav-link"
-              :class="{ 'nav-link-active': $route.path.startsWith('/tickets') }"
+              :class="{ 'active': $route.path.startsWith('/tickets') }"
             >
-              My Tickets
+              <i class="bi bi-ticket-perforated me-2"></i>My Tickets
             </RouterLink>
+          </li>
+          <li class="nav-item" v-if="authStore.isAuthenticated">
             <RouterLink
-              v-if="authStore.isAuthenticated"
               to="/dashboard"
               class="nav-link"
-              :class="{ 'nav-link-active': $route.path.startsWith('/dashboard') }"
+              :class="{ 'active': $route.path.startsWith('/dashboard') }"
             >
-              Dashboard
+              <i class="bi bi-speedometer2 me-2"></i>Dashboard
             </RouterLink>
-          </div>
-        </div>
+          </li>
+        </ul>
 
         <!-- User Menu -->
-        <div class="flex items-center space-x-4">
+        <div class="d-flex align-items-center">
           <template v-if="authStore.isAuthenticated">
             <!-- User Dropdown -->
-            <div class="relative" ref="userMenuRef">
+            <div class="dropdown">
               <button
-                @click="showUserMenu = !showUserMenu"
-                class="flex items-center space-x-2 text-dark-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-xl p-2 transition-all duration-300 hover:bg-dark-800/30 backdrop-blur-sm"
+                class="btn btn-link dropdown-toggle d-flex align-items-center text-decoration-none"
+                type="button"
+                id="userDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
               >
-                <div class="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-500 rounded-full flex items-center justify-center shadow-md">
-                  <span class="text-white font-semibold text-xs">
+                <div class="d-flex align-items-center justify-content-center rounded-3 me-2" 
+                     style="width: 32px; height: 32px; background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                  <span class="text-white fw-semibold small">
                     {{ authStore.userName.charAt(0).toUpperCase() }}
                   </span>
                 </div>
-                <span class="hidden md:block font-semibold text-sm tracking-wide font-poppins">{{ authStore.userName }}</span>
-                <ChevronDownIcon class="w-3 h-3 transition-transform duration-300" :class="{ 'rotate-180': showUserMenu }" />
+                <div class="d-none d-md-flex flex-column align-items-start me-2">
+                  <span class="fw-semibold small text-light professional-title">{{ authStore.userName }}</span>
+                  <small class="text-muted" style="font-size: 0.7rem;">Account</small>
+                </div>
               </button>
 
-              <!-- Dropdown Menu -->
-              <Transition name="fade">
-                <div
-                  v-if="showUserMenu"
-                  class="absolute right-0 mt-2 w-48 bg-dark-800/95 backdrop-blur-md rounded-xl shadow-dark-lg border border-dark-700/50 py-1 z-50"
-                >
-                  <RouterLink
-                    to="/profile"
-                    @click="showUserMenu = false"
-                    class="dropdown-item"
-                  >
-                    <UserIcon class="w-4 h-4" />
-                    Profile
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li>
+                  <RouterLink to="/profile" class="dropdown-item">
+                    <i class="bi bi-person me-2 text-primary"></i>Profile
                   </RouterLink>
-                  <RouterLink
-                    to="/tickets"
-                    @click="showUserMenu = false"
-                    class="dropdown-item"
-                  >
-                    <TicketIcon class="w-4 h-4" />
-                    My Tickets
+                </li>
+                <li>
+                  <RouterLink to="/tickets" class="dropdown-item">
+                    <i class="bi bi-ticket-perforated me-2 text-info"></i>My Tickets
                   </RouterLink>
-                  <RouterLink
-                    to="/contact"
-                    @click="showUserMenu = false"
-                    class="dropdown-item"
-                  >
-                    <EnvelopeIcon class="w-4 h-4" />
-                    Contact Support
+                </li>
+                <li>
+                  <RouterLink to="/payments" class="dropdown-item">
+                    <i class="bi bi-credit-card me-2 text-warning"></i>Payment History
                   </RouterLink>
-                  <hr class="border-gray-700 my-1">
-                  <button
-                    @click="handleLogout"
-                    class="dropdown-item w-full text-left text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                  >
-                    <ArrowRightOnRectangleIcon class="w-4 h-4" />
-                    Logout
+                </li>
+                <li>
+                  <RouterLink to="/contact" class="dropdown-item">
+                    <i class="bi bi-envelope me-2 text-success"></i>Contact Support
+                  </RouterLink>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <button @click="handleLogout" class="dropdown-item text-danger">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
                   </button>
-                </div>
-              </Transition>
+                </li>
+              </ul>
             </div>
           </template>
 
           <template v-else>
             <!-- Auth Buttons -->
-            <RouterLink
-              to="/auth/login"
-              class="btn btn-outline text-sm"
-            >
-              Login
-            </RouterLink>
-            <RouterLink
-              to="/auth/register"
-              class="btn btn-primary text-sm"
-            >
-              Register
-            </RouterLink>
-          </template>
-
-          <!-- Mobile Menu Button -->
-          <button
-            @click="showMobileMenu = !showMobileMenu"
-            class="md:hidden text-dark-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-xl p-3 transition-all duration-300 hover:bg-dark-800/50 backdrop-blur-sm"
-          >
-            <Bars3Icon v-if="!showMobileMenu" class="w-6 h-6" />
-            <XMarkIcon v-else class="w-6 h-6" />
-          </button>
-        </div>
-      </div>
-
-      <!-- Mobile Navigation -->
-      <Transition name="slide">
-        <div v-if="showMobileMenu" class="md:hidden border-t border-dark-700/50 py-6 bg-dark-800/50 backdrop-blur-md">
-          <div class="space-y-2">
-            <RouterLink
-              to="/"
-              @click="showMobileMenu = false"
-              class="mobile-nav-link"
-              :class="{ 'mobile-nav-link-active': $route.path === '/' }"
-            >
-              Home
-            </RouterLink>
-            <RouterLink
-              to="/events"
-              @click="showMobileMenu = false"
-              class="mobile-nav-link"
-              :class="{ 'mobile-nav-link-active': $route.path.startsWith('/events') }"
-            >
-              Events
-            </RouterLink>
-            <RouterLink
-              v-if="authStore.isAuthenticated"
-              to="/tickets"
-              @click="showMobileMenu = false"
-              class="mobile-nav-link"
-              :class="{ 'mobile-nav-link-active': $route.path.startsWith('/tickets') }"
-            >
-              My Tickets
-            </RouterLink>
-            <RouterLink
-              v-if="authStore.isAuthenticated"
-              to="/dashboard"
-              @click="showMobileMenu = false"
-              class="mobile-nav-link"
-              :class="{ 'mobile-nav-link-active': $route.path.startsWith('/dashboard') }"
-            >
-              Dashboard
-            </RouterLink>
-          </div>
-
-          <template v-if="!authStore.isAuthenticated">
-            <div class="mt-6 pt-6 border-t border-dark-700/50 space-y-3">
-              <RouterLink
-                to="/auth/login"
-                @click="showMobileMenu = false"
-                class="btn btn-outline w-full text-center"
-              >
+            <div class="d-flex gap-2">
+              <RouterLink to="/auth/login" class="btn btn-outline-light btn-sm">
                 Login
               </RouterLink>
-              <RouterLink
-                to="/auth/register"
-                @click="showMobileMenu = false"
-                class="btn btn-primary w-full text-center"
-              >
+              <RouterLink to="/auth/register" class="btn btn-primary btn-sm">
                 Register
               </RouterLink>
             </div>
           </template>
+
         </div>
-      </Transition>
+      </div>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import {
-  ChevronDownIcon,
-  UserIcon,
-  TicketIcon,
-  EnvelopeIcon,
-  ArrowRightOnRectangleIcon,
-  Bars3Icon,
-  XMarkIcon
-} from '@heroicons/vue/24/outline'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
-const showUserMenu = ref(false)
-const showMobileMenu = ref(false)
-const userMenuRef = ref<HTMLElement>()
-
 const handleLogout = async () => {
-  showUserMenu.value = false
-  showMobileMenu.value = false
   await authStore.logout()
   router.push('/')
 }
-
-// Close menus when clicking outside
-const handleClickOutside = (event: Event) => {
-  if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
-    showUserMenu.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
 </script>
 
-<style scoped>
-.nav-link {
-  @apply text-dark-300 hover:text-white px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 hover:bg-dark-800/50 backdrop-blur-sm tracking-wide font-poppins;
-}
 
-.nav-link-active {
-  @apply text-white bg-gradient-to-r from-primary-600 to-primary-500 shadow-glow;
-}
 
-.mobile-nav-link {
-  @apply block text-dark-300 hover:text-white px-4 py-3 rounded-xl text-base font-bold transition-all duration-300 hover:bg-dark-700/50 tracking-wide font-poppins;
-}
 
-.mobile-nav-link-active {
-  @apply text-white bg-gradient-to-r from-primary-600 to-primary-500 shadow-glow;
-}
-
-.dropdown-item {
-  @apply flex items-center space-x-2 px-3 py-2 mx-1 text-sm font-semibold text-dark-300 hover:text-white hover:bg-dark-700/50 rounded-lg transition-all duration-300 tracking-wide font-poppins;
-}
-</style>

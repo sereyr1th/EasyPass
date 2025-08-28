@@ -1,0 +1,24 @@
+<svg width="120" height="80" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ticket shape background -->
+  <path d="M10 10 L110 10 Q115 10 115 15 L115 25 Q110 30 115 35 L115 65 Q115 70 110 70 L10 70 Q5 70 5 65 L5 35 Q10 30 5 25 L5 15 Q5 10 10 10 Z" 
+        fill="#059669" stroke="none"/>
+  
+  <!-- Left side perforations -->
+  <circle cx="5" cy="20" r="2" fill="#0a0a0a"/>
+  <circle cx="5" cy="30" r="2" fill="#0a0a0a"/>
+  <circle cx="5" cy="40" r="2" fill="#0a0a0a"/>
+  <circle cx="5" cy="50" r="2" fill="#0a0a0a"/>
+  <circle cx="5" cy="60" r="2" fill="#0a0a0a"/>
+  
+  <!-- Right side perforations -->
+  <circle cx="115" cy="20" r="2" fill="#0a0a0a"/>
+  <circle cx="115" cy="30" r="2" fill="#0a0a0a"/>
+  <circle cx="115" cy="40" r="2" fill="#0a0a0a"/>
+  <circle cx="115" cy="50" r="2" fill="#0a0a0a"/>
+  <circle cx="115" cy="60" r="2" fill="#0a0a0a"/>
+  
+  <!-- Text -->
+  <text x="60" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">
+    EASYPASS
+  </text>
+</svg>

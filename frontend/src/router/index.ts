@@ -64,6 +64,18 @@ const router = createRouter({
       meta: { title: 'Ticket Details - EasyPass', requiresAuth: true }
     },
     {
+      path: '/payments',
+      name: 'payment-history',
+      component: () => import('../views/PaymentHistoryView.vue'),
+      meta: { title: 'Payment History - EasyPass', requiresAuth: true }
+    },
+    {
+      path: '/admin/payments',
+      name: 'admin-payments',
+      component: () => import('../views/AdminPaymentsView.vue'),
+      meta: { title: 'Admin Payments - EasyPass', requiresAuth: true }
+    },
+    {
       path: '/validate',
       name: 'validate-ticket',
       component: () => import('../views/ValidateTicketView.vue'),

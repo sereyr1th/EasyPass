@@ -18,11 +18,16 @@ class TicketPurchase extends Model
         'amount_paid',
         'payment_method',
         'transaction_id',
-        'payment_status'
+        'payment_status',
+        'bakong_qr_data',
+        'bakong_payment_reference',
+        'payment_expires_at'
     ];
 
     protected $casts = [
         'amount_paid' => 'decimal:2',
+        'bakong_qr_data' => 'array',
+        'payment_expires_at' => 'datetime',
     ];
 
     /**

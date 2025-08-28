@@ -35,6 +35,7 @@ export interface EventFilters {
   sort_by?: string
   sort_order?: 'asc' | 'desc'
   per_page?: number
+  page?: number
 }
 
 export const useEventsStore = defineStore('events', () => {

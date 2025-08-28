@@ -1,10 +1,10 @@
 import axios from 'axios'
 
 // Configure axios defaults
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8002'
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 axios.defaults.headers.common['Accept'] = 'application/json'
 axios.defaults.headers.common['Content-Type'] = 'application/json'
-axios.defaults.withCredentials = true
+axios.defaults.withCredentials = false
 
 // Request interceptor
 axios.interceptors.request.use(

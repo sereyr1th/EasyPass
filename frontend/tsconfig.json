@@ -7,5 +7,16 @@
     {
       "path": "./tsconfig.app.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "vueCompilerOptions": {
+    "target": 3,
+    "extensions": [".vue"],
+    "experimentalRuntimeMode": "runtime-dom"
+  }
 }

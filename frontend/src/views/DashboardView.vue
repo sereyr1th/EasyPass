@@ -1,153 +1,169 @@
 <template>
-  <div class="min-h-screen bg-gray-900 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="min-vh-100" style="padding-top: 100px;">
+    <div class="container">
       <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-4xl font-bold text-white mb-2">Dashboard</h1>
-        <p class="text-gray-300">Welcome back, {{ authStore.userName }}! Manage your events and tickets here.</p>
+      <div class="mb-5">
+        <h1 class="display-3 fw-bold text-light mb-3 professional-title">Dashboard</h1>
+        <p class="lead text-muted">Welcome back, {{ authStore.userName }}! Manage your events and tickets here.</p>
       </div>
 
       <!-- Quick Actions -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <RouterLink
-          to="/dashboard/events/create"
-          class="card p-6 hover:bg-gray-700 transition-colors duration-200 group"
-        >
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center group-hover:bg-green-500 transition-colors duration-200">
-              <PlusIcon class="w-6 h-6 text-white" />
+      <div class="row g-4 mb-5">
+        <div class="col-lg-4 col-md-6">
+          <RouterLink
+            to="/dashboard/events/create"
+            class="card h-100 text-decoration-none"
+            style="transition: transform 0.2s;"
+          >
+            <div class="card-body d-flex align-items-center">
+              <div class="d-flex align-items-center justify-content-center rounded-3 me-3 glow-animation" 
+                   style="width: 48px; height: 48px; background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                <i class="bi bi-plus-circle fs-4 text-white"></i>
+              </div>
+              <div>
+                <h5 class="card-title fw-bold text-light mb-1 professional-title">Create Event</h5>
+                <p class="card-text text-muted small mb-0">Start organizing your event</p>
+              </div>
             </div>
-            <div class="ml-4">
-              <h3 class="text-lg font-semibold text-white">Create Event</h3>
-              <p class="text-gray-400">Start organizing your event</p>
-            </div>
-          </div>
-        </RouterLink>
+          </RouterLink>
+        </div>
 
-        <RouterLink
-          to="/tickets"
-          class="card p-6 hover:bg-gray-700 transition-colors duration-200 group"
-        >
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center group-hover:bg-blue-500 transition-colors duration-200">
-              <TicketIcon class="w-6 h-6 text-white" />
+        <div class="col-lg-4 col-md-6">
+          <RouterLink
+            to="/tickets"
+            class="card h-100 text-decoration-none"
+            style="transition: transform 0.2s;"
+          >
+            <div class="card-body d-flex align-items-center">
+              <div class="d-flex align-items-center justify-content-center rounded-3 me-3 glow-animation" 
+                   style="width: 48px; height: 48px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
+                <i class="bi bi-ticket-perforated fs-4 text-white"></i>
+              </div>
+              <div>
+                <h5 class="card-title fw-bold text-light mb-1 professional-title">My Tickets</h5>
+                <p class="card-text text-muted small mb-0">View purchased tickets</p>
+              </div>
             </div>
-            <div class="ml-4">
-              <h3 class="text-lg font-semibold text-white">My Tickets</h3>
-              <p class="text-gray-400">View purchased tickets</p>
-            </div>
-          </div>
-        </RouterLink>
+          </RouterLink>
+        </div>
 
-        <RouterLink
-          to="/validate"
-          class="card p-6 hover:bg-gray-700 transition-colors duration-200 group"
-        >
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center group-hover:bg-purple-500 transition-colors duration-200">
-              <QrCodeIcon class="w-6 h-6 text-white" />
+        <div class="col-lg-4 col-md-6">
+          <RouterLink
+            to="/validate"
+            class="card h-100 text-decoration-none"
+            style="transition: transform 0.2s;"
+          >
+            <div class="card-body d-flex align-items-center">
+              <div class="d-flex align-items-center justify-content-center rounded-3 me-3 glow-animation" 
+                   style="width: 48px; height: 48px; background: linear-gradient(135deg, #15803d 0%, #166534 100%);">
+                <i class="bi bi-qr-code fs-4 text-white"></i>
+              </div>
+              <div>
+                <h5 class="card-title fw-bold text-light mb-1 professional-title">Validate Tickets</h5>
+                <p class="card-text text-muted small mb-0">Check ticket validity</p>
+              </div>
             </div>
-            <div class="ml-4">
-              <h3 class="text-lg font-semibold text-white">Validate Tickets</h3>
-              <p class="text-gray-400">Check ticket validity</p>
-            </div>
-          </div>
-        </RouterLink>
+          </RouterLink>
+        </div>
       </div>
 
       <!-- My Events Section -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-white">My Events</h2>
+      <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="h3 fw-bold text-light professional-title">My Events</h2>
           <RouterLink
             to="/dashboard/events/create"
-            class="btn btn-primary inline-flex items-center"
+            class="btn btn-primary d-inline-flex align-items-center"
           >
-            <PlusIcon class="w-4 h-4 mr-2" />
+            <i class="bi bi-plus-circle me-2"></i>
             Create Event
           </RouterLink>
         </div>
 
-        <div v-if="eventsStore.loading" class="flex justify-center py-12">
-          <div class="spinner"></div>
+        <div v-if="eventsStore.loading" class="d-flex justify-content-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </div>
 
-        <div v-else-if="eventsStore.myEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-else-if="eventsStore.myEvents.length > 0" class="row g-4">
           <div
             v-for="event in eventsStore.myEvents"
             :key="event.id"
-            class="card overflow-hidden"
+            class="col-lg-4 col-md-6"
           >
-            <!-- Event Image -->
-            <div class="aspect-video bg-gray-700 relative">
-              <img
-                v-if="event.image_url"
-                :src="event.image_url"
-                :alt="event.title"
-                class="w-full h-full object-cover"
-              />
-              <div v-else class="w-full h-full flex items-center justify-center">
-                <CalendarIcon class="w-12 h-12 text-gray-500" />
-              </div>
-              
-              <!-- Status Badge -->
-              <div class="absolute top-4 left-4">
-                <span
-                  :class="{
-                    'bg-green-600': event.status === 'active',
-                    'bg-red-600': event.status === 'cancelled',
-                    'bg-gray-600': event.status === 'completed'
-                  }"
-                  class="px-2 py-1 text-white text-xs font-medium rounded-full"
-                >
-                  {{ event.status }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Event Content -->
-            <div class="p-6">
-              <h3 class="text-lg font-semibold text-white mb-2">{{ event.title }}</h3>
-              <p class="text-gray-400 text-sm mb-4">{{ event.category }}</p>
-              
-              <div class="space-y-2 mb-4">
-                <div class="flex items-center text-gray-400 text-sm">
-                  <CalendarIcon class="w-4 h-4 mr-2" />
-                  <span>{{ formatDate(event.event_date) }}</span>
+            <div class="card h-100 overflow-hidden">
+              <!-- Event Image -->
+              <div class="position-relative overflow-hidden" style="height: 180px;">
+                <img
+                  v-if="event.image_url"
+                  :src="event.image_url"
+                  :alt="event.title"
+                  class="card-img-top w-100 h-100 object-fit-cover"
+                />
+                <div v-else class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary">
+                  <i class="bi bi-calendar-event display-4 text-muted"></i>
                 </div>
-                <div class="flex items-center text-gray-400 text-sm">
-                  <UsersIcon class="w-4 h-4 mr-2" />
-                  <span>{{ event.current_attendees }}/{{ event.max_attendees }} attendees</span>
+                
+                <!-- Status Badge -->
+                <div class="position-absolute top-0 start-0 m-3">
+                  <span
+                    :class="{
+                      'bg-success': event.status === 'active',
+                      'bg-danger': event.status === 'cancelled',
+                      'bg-secondary': event.status === 'completed'
+                    }"
+                    class="badge"
+                  >
+                    {{ event.status }}
+                  </span>
                 </div>
               </div>
 
-              <div class="flex space-x-2">
-                <RouterLink
-                  :to="{ name: 'edit-event', params: { id: event.id } }"
-                  class="btn btn-secondary text-sm flex-1 text-center"
-                >
-                  Edit
-                </RouterLink>
-                <RouterLink
-                  :to="{ name: 'event-detail', params: { id: event.id } }"
-                  class="btn btn-outline text-sm flex-1 text-center"
-                >
-                  View
-                </RouterLink>
+              <!-- Event Content -->
+              <div class="card-body">
+                <h5 class="card-title fw-bold text-light mb-2 professional-title">{{ event.title }}</h5>
+                <p class="text-muted small mb-3">{{ event.category }}</p>
+                
+                <div class="mb-3">
+                  <div class="d-flex align-items-center text-muted small mb-2">
+                    <i class="bi bi-calendar-event me-2 text-primary"></i>
+                    <span>{{ formatDate(event.event_date) }}</span>
+                  </div>
+                  <div class="d-flex align-items-center text-muted small">
+                    <i class="bi bi-people me-2 text-info"></i>
+                    <span>{{ event.current_attendees }}/{{ event.max_attendees }} attendees</span>
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex">
+                  <RouterLink
+                    :to="{ name: 'edit-event', params: { id: event.id } }"
+                    class="btn btn-outline-primary btn-sm flex-md-fill"
+                  >
+                    <i class="bi bi-pencil me-2"></i>Edit
+                  </RouterLink>
+                  <RouterLink
+                    :to="{ name: 'event-detail', params: { id: event.id } }"
+                    class="btn btn-outline-secondary btn-sm flex-md-fill"
+                  >
+                    <i class="bi bi-eye me-2"></i>View
+                  </RouterLink>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div v-else class="text-center py-12">
-          <CalendarIcon class="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-gray-400 mb-2">No Events Yet</h3>
-          <p class="text-gray-500 mb-4">Create your first event to get started!</p>
+        <div v-else class="text-center py-5">
+          <i class="bi bi-calendar-x display-1 text-muted mb-4"></i>
+          <h3 class="h4 fw-bold text-light mb-3 professional-title">No Events Yet</h3>
+          <p class="text-muted mb-4">Create your first event to get started!</p>
           <RouterLink
             to="/dashboard/events/create"
-            class="btn btn-primary inline-flex items-center"
+            class="btn btn-primary d-inline-flex align-items-center"
           >
-            <PlusIcon class="w-4 h-4 mr-2" />
+            <i class="bi bi-plus-circle me-2"></i>
             Create Your First Event
           </RouterLink>
         </div>
@@ -161,13 +177,6 @@ import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useEventsStore } from '@/stores/events'
-import {
-  PlusIcon,
-  TicketIcon,
-  QrCodeIcon,
-  CalendarIcon,
-  UsersIcon
-} from '@heroicons/vue/24/outline'
 
 const authStore = useAuthStore()
 const eventsStore = useEventsStore()

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('ticket_id')->constrained('tickets')->onDelete('cascade');
+            $table->foreignId('ticket_id')->nullable()->constrained('tickets')->onDelete('cascade');
             $table->decimal('amount_paid', 10, 2);
             $table->string('payment_method')->default('online');
             $table->string('transaction_id')->unique();

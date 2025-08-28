@@ -1,116 +1,113 @@
 <template>
-  <div class="min-h-screen bg-gray-900 py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div v-if="loading" class="flex justify-center py-12">
-        <div class="spinner"></div>
+  <div class="min-vh-100" style="padding-top: 100px;">
+    <div class="container" style="max-width: 1200px;">
+      <div v-if="loading" class="d-flex justify-content-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
       </div>
       
-      <div v-else-if="event" class="space-y-8">
+      <div v-else-if="event">
         <!-- Event Header -->
-        <div class="card overflow-hidden">
-          <div class="aspect-video bg-gray-700 relative">
+        <div class="card overflow-hidden mb-4">
+          <div class="position-relative overflow-hidden" style="height: 400px;">
             <img
               v-if="event.image_url"
               :src="event.image_url"
               :alt="event.title"
-              class="w-full h-full object-cover"
+              class="w-100 h-100 object-fit-cover"
             />
-            <div v-else class="w-full h-full flex items-center justify-center">
-              <svg class="w-24 h-24 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-              </svg>
+            <div v-else class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary">
+              <i class="bi bi-calendar-event display-1 text-muted"></i>
             </div>
           </div>
           
-          <div class="p-8">
-            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-              <div class="flex-1">
-                <h1 class="text-4xl font-bold text-white mb-4">{{ event.title }}</h1>
-                <p class="text-gray-300 text-lg mb-6">{{ event.description }}</p>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-lg-8">
+                <h1 class="display-4 fw-bold text-light mb-4 professional-title">{{ event.title }}</h1>
+                <p class="lead text-muted mb-4">{{ event.description }}</p>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div class="space-y-4">
-                    <div class="flex items-center text-gray-300">
-                      <svg class="w-5 h-5 mr-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                      </svg>
-                      <span>{{ formatDate(event.event_date) }}</span>
-                    </div>
-                    
-                    <div class="flex items-center text-gray-300">
-                      <svg class="w-5 h-5 mr-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                      </svg>
-                      <span>{{ event.location }}</span>
-                    </div>
-                    
-                    <div class="flex items-center text-gray-300">
-                      <svg class="w-5 h-5 mr-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>{{ event.category }}</span>
+                <div class="row g-4 mb-4">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <div class="d-flex align-items-center text-muted mb-2">
+                        <i class="bi bi-calendar-event me-3 text-primary fs-5"></i>
+                        <span>{{ formatDate(event.event_date) }}</span>
+                      </div>
+                      
+                      <div class="d-flex align-items-center text-muted mb-2">
+                        <i class="bi bi-geo-alt me-3 text-success fs-5"></i>
+                        <span>{{ event.location }}</span>
+                      </div>
+                      
+                      <div class="d-flex align-items-center text-muted">
+                        <i class="bi bi-bookmark me-3 text-info fs-5"></i>
+                        <span>{{ event.category }}</span>
+                      </div>
                     </div>
                   </div>
                   
-                  <div class="space-y-4">
-                    <div class="flex items-center text-gray-300">
-                      <svg class="w-5 h-5 mr-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
-                      </svg>
-                      <span class="text-2xl font-bold text-green-400">
-                        {{ event.price > 0 ? `$${event.price}` : 'Free' }}
-                      </span>
-                    </div>
-                    
-                    <div class="flex items-center text-gray-300">
-                      <svg class="w-5 h-5 mr-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                      </svg>
-                      <span>{{ event.current_attendees }}/{{ event.max_attendees }} attendees</span>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <div class="d-flex align-items-center text-muted mb-2">
+                        <i class="bi bi-cash-coin me-3 text-success fs-5"></i>
+                        <span class="h4 fw-bold text-success mb-0">
+                          {{ event.price > 0 ? `$${event.price}` : 'Free' }}
+                        </span>
+                      </div>
+                      
+                      <div class="d-flex align-items-center text-muted">
+                        <i class="bi bi-people me-3 text-warning fs-5"></i>
+                        <span>{{ event.current_attendees }}/{{ event.max_attendees }} attendees</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div class="lg:ml-8 mt-6 lg:mt-0">
-                <div class="card p-6 lg:w-80">
-                  <h3 class="text-lg font-semibold text-white mb-4">Get Your Ticket</h3>
-                  
-                  <div v-if="!authStore.isAuthenticated" class="space-y-4">
-                    <p class="text-gray-400 text-sm">Please sign in to purchase tickets</p>
-                    <RouterLink
-                      to="/auth/login"
-                      class="btn btn-primary w-full text-center"
-                    >
-                      Sign In to Purchase
-                    </RouterLink>
-                  </div>
-                  
-                  <div v-else-if="event.status !== 'active'" class="text-center">
-                    <p class="text-red-400">This event is no longer available</p>
-                  </div>
-                  
-                  <div v-else-if="event.current_attendees >= event.max_attendees" class="text-center">
-                    <p class="text-yellow-400">This event is sold out</p>
-                  </div>
-                  
-                  <div v-else class="space-y-4">
-                    <button
-                      @click="purchaseTicket"
-                      :disabled="purchasing"
-                      class="btn btn-primary w-full flex items-center justify-center"
-                    >
-                      <div v-if="purchasing" class="spinner mr-2"></div>
-                      <svg v-else class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
-                      </svg>
-                      {{ purchasing ? 'Processing...' : 'Purchase Ticket' }}
-                    </button>
+              <div class="col-lg-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h3 class="h5 fw-bold text-light mb-4 professional-title">Get Your Ticket</h3>
                     
-                    <p class="text-xs text-gray-400 text-center">
-                      Secure payment processing
-                    </p>
+                    <div v-if="!authStore.isAuthenticated">
+                      <p class="text-muted small mb-3">Please sign in to purchase tickets</p>
+                      <RouterLink
+                        to="/auth/login"
+                        class="btn btn-primary w-100 d-flex align-items-center justify-content-center"
+                      >
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Sign In to Purchase
+                      </RouterLink>
+                    </div>
+                    
+                    <div v-else-if="event.status !== 'active'" class="text-center">
+                      <p class="text-danger">This event is no longer available</p>
+                    </div>
+                    
+                    <div v-else-if="event.current_attendees >= event.max_attendees" class="text-center">
+                      <p class="text-warning">This event is sold out</p>
+                    </div>
+                    
+                    <div v-else>
+                      <button
+                        @click="showPaymentModal = true"
+                        :disabled="purchasing"
+                        class="btn btn-primary w-100 d-flex align-items-center justify-content-center mb-3"
+                      >
+                        <div v-if="purchasing" class="spinner-border spinner-border-sm me-2" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <i v-else class="bi bi-cart-plus me-2"></i>
+                        {{ purchasing ? 'Processing...' : 'Purchase Ticket' }}
+                      </button>
+                      
+                      <p class="text-muted small text-center mb-0">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Secure Bakong payment
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -119,12 +116,43 @@
         </div>
       </div>
       
-      <div v-else class="text-center py-12">
-        <h2 class="text-2xl font-bold text-gray-400 mb-4">Event Not Found</h2>
-        <p class="text-gray-500 mb-6">The event you're looking for doesn't exist or has been removed.</p>
-        <RouterLink to="/events" class="btn btn-primary">
+      <div v-else class="text-center py-5">
+        <i class="bi bi-calendar-x display-1 text-muted mb-4"></i>
+        <h2 class="h4 fw-bold text-muted mb-3 professional-title">Event Not Found</h2>
+        <p class="text-muted mb-4">The event you're looking for doesn't exist or has been removed.</p>
+        <RouterLink to="/events" class="btn btn-primary d-inline-flex align-items-center">
+          <i class="bi bi-calendar-event me-2"></i>
           Browse Events
         </RouterLink>
+      </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div
+      v-if="showPaymentModal"
+      class="modal fade show d-block"
+      style="background-color: rgba(0, 0, 0, 0.5);"
+      tabindex="-1"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Purchase Ticket - {{ event?.title }}</h5>
+            <button
+              type="button"
+              class="btn-close"
+              @click="closePaymentModal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <BakongPayment
+              v-if="event"
+              :event="event"
+              @payment-success="handlePaymentSuccess"
+              @payment-cancelled="closePaymentModal"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -134,8 +162,9 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useEventsStore } from '@/stores/events'
+import { useEventsStore, type Event } from '@/stores/events'
 import { useTicketsStore } from '@/stores/tickets'
+import BakongPayment from '@/components/payment/BakongPayment.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -145,7 +174,8 @@ const ticketsStore = useTicketsStore()
 
 const loading = ref(true)
 const purchasing = ref(false)
-const event = ref(null)
+const event = ref<Event | null>(null)
+const showPaymentModal = ref(false)
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -159,16 +189,13 @@ const formatDate = (dateString: string) => {
   }).format(date)
 }
 
-const purchaseTicket = async () => {
-  purchasing.value = true
-  
-  const result = await ticketsStore.purchaseTicket(event.value.id)
-  
-  if (result.success) {
-    router.push('/tickets')
-  }
-  
-  purchasing.value = false
+const handlePaymentSuccess = (ticket: any) => {
+  showPaymentModal.value = false
+  router.push('/tickets')
+}
+
+const closePaymentModal = () => {
+  showPaymentModal.value = false
 }
 
 onMounted(async () => {

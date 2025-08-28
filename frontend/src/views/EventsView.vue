@@ -1,131 +1,141 @@
 <template>
-  <div class="min-h-screen bg-gray-900 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="min-vh-100" style="padding-top: 100px;">
+    <div class="container">
       <!-- Header -->
-      <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-white mb-4">Discover Events</h1>
-        <p class="text-gray-300 text-lg max-w-2xl mx-auto">
-          Find amazing events happening around you. Book your tickets now!
+      <div class="text-center mb-5">
+        <h1 class="display-2 fw-bold text-light mb-4 professional-title">Discover Events</h1>
+        <p class="lead text-muted mx-auto" style="max-width: 600px;">
+          Find amazing events happening around you. Book your tickets now and create unforgettable memories!
         </p>
       </div>
 
       <!-- Search and Filters -->
-      <div class="card p-6 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Search -->
-          <div class="md:col-span-2">
-            <label class="form-label">Search Events</label>
-            <div class="relative">
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                v-model="filters.search"
-                type="text"
-                placeholder="Search events, categories, locations..."
-                class="form-input pl-10"
-                @input="debouncedSearch"
-              />
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-3">
+            <!-- Search -->
+            <div class="col-md-6">
+              <label class="form-label">Search Events</label>
+              <div class="position-relative">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input
+                  v-model="filters.search"
+                  type="text"
+                  placeholder="Search events, categories, locations..."
+                  class="form-control ps-5"
+                  @input="debouncedSearch"
+                />
+              </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="col-md-3">
+              <label class="form-label">Category</label>
+              <select v-model="filters.category" class="form-select" @change="handleFilterChange">
+                <option value="">All Categories</option>
+                <option v-for="category in eventsStore.categories" :key="category" :value="category">
+                  {{ category }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Sort -->
+            <div class="col-md-3">
+              <label class="form-label">Sort By</label>
+              <select v-model="filters.sort_by" class="form-select" @change="handleFilterChange">
+                <option value="event_date">Event Date</option>
+                <option value="price">Price</option>
+                <option value="created_at">Recently Added</option>
+              </select>
             </div>
           </div>
 
-          <!-- Category Filter -->
-          <div>
-            <label class="form-label">Category</label>
-            <select v-model="filters.category" class="form-input" @change="handleFilterChange">
-              <option value="">All Categories</option>
-              <option v-for="category in eventsStore.categories" :key="category" :value="category">
-                {{ category }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Sort -->
-          <div>
-            <label class="form-label">Sort By</label>
-            <select v-model="filters.sort_by" class="form-input" @change="handleFilterChange">
-              <option value="event_date">Event Date</option>
-              <option value="price">Price</option>
-              <option value="created_at">Recently Added</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Date Range -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div>
-            <label class="form-label">From Date</label>
-            <input
-              v-model="filters.date_from"
-              type="date"
-              class="form-input"
-              @change="handleFilterChange"
-            />
-          </div>
-          <div>
-            <label class="form-label">To Date</label>
-            <input
-              v-model="filters.date_to"
-              type="date"
-              class="form-input"
-              @change="handleFilterChange"
-            />
+          <!-- Date Range -->
+          <div class="row g-3 mt-2">
+            <div class="col-md-6">
+              <label class="form-label">From Date</label>
+              <input
+                v-model="filters.date_from"
+                type="date"
+                class="form-control"
+                @change="handleFilterChange"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">To Date</label>
+              <input
+                v-model="filters.date_to"
+                type="date"
+                class="form-control"
+                @change="handleFilterChange"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div v-if="eventsStore.loading" class="flex justify-center py-12">
-        <div class="spinner"></div>
+      <div v-if="eventsStore.loading" class="d-flex justify-content-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
       </div>
 
       <!-- Events Grid -->
       <div v-else-if="eventsStore.events.length > 0">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <EventCard
-            v-for="event in eventsStore.events"
-            :key="event.id"
-            :event="event"
-          />
+        <div class="row g-4 mb-5">
+          <div v-for="event in eventsStore.events" :key="event.id" class="col-lg-4 col-md-6">
+            <EventCard :event="event" />
+          </div>
         </div>
 
         <!-- Pagination -->
-        <div v-if="eventsStore.pagination.last_page > 1" class="flex justify-center">
-          <nav class="flex items-center space-x-2">
-            <button
-              :disabled="eventsStore.pagination.current_page === 1"
-              @click="changePage(eventsStore.pagination.current_page - 1)"
-              class="btn btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeftIcon class="w-4 h-4" />
-              Previous
-            </button>
+        <div v-if="eventsStore.pagination.last_page > 1" class="d-flex justify-content-center">
+          <nav aria-label="Page navigation">
+            <ul class="pagination">
+              <li class="page-item" :class="{ disabled: eventsStore.pagination.current_page === 1 }">
+                <button
+                  class="page-link"
+                  @click="changePage(eventsStore.pagination.current_page - 1)"
+                  :disabled="eventsStore.pagination.current_page === 1"
+                >
+                  <i class="bi bi-chevron-left me-1"></i>
+                  Previous
+                </button>
+              </li>
 
-            <span class="text-gray-300 px-4">
-              Page {{ eventsStore.pagination.current_page }} of {{ eventsStore.pagination.last_page }}
-            </span>
+              <li class="page-item disabled">
+                <span class="page-link">
+                  Page {{ eventsStore.pagination.current_page }} of {{ eventsStore.pagination.last_page }}
+                </span>
+              </li>
 
-            <button
-              :disabled="eventsStore.pagination.current_page === eventsStore.pagination.last_page"
-              @click="changePage(eventsStore.pagination.current_page + 1)"
-              class="btn btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-              <ChevronRightIcon class="w-4 h-4" />
-            </button>
+              <li class="page-item" :class="{ disabled: eventsStore.pagination.current_page === eventsStore.pagination.last_page }">
+                <button
+                  class="page-link"
+                  @click="changePage(eventsStore.pagination.current_page + 1)"
+                  :disabled="eventsStore.pagination.current_page === eventsStore.pagination.last_page"
+                >
+                  Next
+                  <i class="bi bi-chevron-right ms-1"></i>
+                </button>
+              </li>
+            </ul>
           </nav>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-12">
-        <CalendarIcon class="w-16 h-16 text-gray-600 mx-auto mb-4" />
-        <h3 class="text-xl font-semibold text-gray-400 mb-2">No Events Found</h3>
-        <p class="text-gray-500 mb-4">
+      <div v-else class="text-center py-5">
+        <i class="bi bi-calendar-x display-1 text-muted mb-4"></i>
+        <h3 class="h4 fw-bold text-light mb-3 professional-title">No Events Found</h3>
+        <p class="text-muted mb-4">
           {{ filters.search || filters.category ? 'Try adjusting your search criteria.' : 'No events are currently available.' }}
         </p>
         <button
           v-if="filters.search || filters.category || filters.date_from || filters.date_to"
           @click="clearFilters"
-          class="btn btn-outline"
+          class="btn btn-outline-primary"
         >
           Clear Filters
         </button>
@@ -135,15 +145,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { reactive, onMounted } from 'vue'
 import { useEventsStore } from '@/stores/events'
 import EventCard from '@/components/events/EventCard.vue'
-import {
-  MagnifyingGlassIcon,
-  CalendarIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon
-} from '@heroicons/vue/24/outline'
 
 const eventsStore = useEventsStore()
 
@@ -157,7 +161,7 @@ const filters = reactive({
   per_page: 12
 })
 
-let searchTimeout: number | null = null
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 const debouncedSearch = () => {
   if (searchTimeout) {
