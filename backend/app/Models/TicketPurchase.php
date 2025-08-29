@@ -19,8 +19,8 @@ class TicketPurchase extends Model
         'payment_method',
         'transaction_id',
         'payment_status',
-        'bakong_qr_data',
-        'bakong_payment_reference',
+        'bakong_qr_data', // Renamed to payment_data but keeping for backward compatibility
+        'bakong_payment_reference', // Renamed to payment_reference but keeping for backward compatibility
         'payment_expires_at'
     ];
 

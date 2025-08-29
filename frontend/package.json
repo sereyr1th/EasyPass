@@ -17,6 +17,7 @@
   "dependencies": {
     "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",
+    "@types/qrcode": "^1.5.5",
     "aos": "^2.3.4",
     "axios": "^1.11.0",
     "bakong-khqr": "^1.0.20",

@@ -107,6 +107,11 @@ Route::get('/health', function () {
     ]);
 });
 
+// Public webhook routes (outside auth middleware)
+Route::prefix('payments/webhook')->group(function () {
+    Route::post('/khqr', [PaymentController::class, 'handleKHQRWebhook']);
+});
+
 // Test payment endpoint (public - for debugging only)
 Route::post('/test-payment', function (Request $request) {
     \Log::info('Test payment request received', $request->all());

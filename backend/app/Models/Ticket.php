@@ -19,6 +19,7 @@ class Ticket extends Model
         'user_id',
         'ticket_number',
         'qr_code',
+        'verification_code',
         'status',
         'purchase_date',
         'used_at'
@@ -58,10 +59,28 @@ class Ticket extends Model
      */
     public function generateQrCode(): string
     {
-        $qrCode = new QrCode($this->ticket_number);
+        $qrData = json_encode([
+            'ticket_id' => $this->id,
+            'ticket_number' => $this->ticket_number,
+            'event_id' => $this->event_id,
+            'user_id' => $this->user_id,
+            'verification_code' => $this->verification_code,
+            'generated_at' => now()->toISOString(),
+            'status' => $this->status
+        ]);
+        
+        $qrCode = new QrCode($qrData);
         $writer = new PngWriter();
         
         return base64_encode($writer->write($qrCode)->getString());
+    }
+
+    /**
+     * Generate verification code
+     */
+    public static function generateVerificationCode(): string
+    {
+        return 'VER-' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
     }
 
     /**

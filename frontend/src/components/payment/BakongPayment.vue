@@ -1,505 +1,474 @@
 <template>
-  <div class="bakong-payment max-w-2xl mx-auto">
-    <!-- Progress Indicator -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <div :class="['w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300', paymentStep === 'form' ? 'bg-blue-600 text-white' : 'bg-green-500 text-white']">
-            <svg v-if="paymentStep !== 'form'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
+  <div class="modern-payment-experience">
+    <!-- Enhanced Progress Indicator -->
+    <div class="progress-section mb-5">
+      <div class="progress-container d-flex align-items-center justify-content-between position-relative">
+        <!-- Step 1: Payment Details -->
+        <div class="progress-step d-flex flex-column align-items-center">
+          <div :class="['step-circle d-flex align-items-center justify-content-center', paymentStep === 'form' ? 'step-active' : (paymentStep === 'processing' || paymentStep === 'success' || paymentStep === 'error') ? 'step-completed' : 'step-pending']">
+            <i v-if="paymentStep === 'processing' || paymentStep === 'success' || paymentStep === 'error'" class="bi bi-check-lg"></i>
             <span v-else>1</span>
           </div>
-          <span :class="['text-sm font-medium transition-colors', paymentStep === 'form' ? 'text-blue-600' : 'text-green-600']">Payment Details</span>
+          <span class="step-label mt-2 small fw-medium">Payment Details</span>
         </div>
         
-        <div class="flex-1 mx-4">
-          <div :class="['h-1 rounded-full transition-all duration-500', paymentStep === 'form' ? 'bg-gray-200' : 'bg-green-500']"></div>
+        <!-- Progress Line 1 -->
+        <div class="progress-line flex-grow-1 mx-3">
+          <div :class="['progress-fill', (paymentStep === 'processing' || paymentStep === 'success' || paymentStep === 'error') ? 'progress-completed' : '']"></div>
         </div>
         
-        <div class="flex items-center space-x-4">
-          <div :class="['w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300', paymentStep === 'qr' ? 'bg-blue-600 text-white' : paymentStep === 'success' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500']">
-            <svg v-if="paymentStep === 'success'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
+                 <!-- Step 2: Process & Pay -->
+         <div class="progress-step d-flex flex-column align-items-center">
+           <div :class="['step-circle d-flex align-items-center justify-content-center', paymentStep === 'processing' ? 'step-active' : paymentStep === 'success' ? 'step-completed' : 'step-pending']">
+             <i v-if="paymentStep === 'success'" class="bi bi-check-lg"></i>
             <span v-else>2</span>
           </div>
-          <span :class="['text-sm font-medium transition-colors', paymentStep === 'qr' ? 'text-blue-600' : paymentStep === 'success' ? 'text-green-600' : 'text-gray-500']">Scan & Pay</span>
+           <span class="step-label mt-2 small fw-medium">Process & Pay</span>
         </div>
         
-        <div class="flex-1 mx-4">
-          <div :class="['h-1 rounded-full transition-all duration-500', paymentStep === 'success' ? 'bg-green-500' : 'bg-gray-200']"></div>
+        <!-- Progress Line 2 -->
+        <div class="progress-line flex-grow-1 mx-3">
+          <div :class="['progress-fill', paymentStep === 'success' ? 'progress-completed' : '']"></div>
         </div>
         
-        <div class="flex items-center space-x-4">
-          <div :class="['w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300', paymentStep === 'success' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500']">
-            <svg v-if="paymentStep === 'success'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
+        <!-- Step 3: Complete -->
+        <div class="progress-step d-flex flex-column align-items-center">
+          <div :class="['step-circle d-flex align-items-center justify-content-center', paymentStep === 'success' ? 'step-completed' : 'step-pending']">
+            <i v-if="paymentStep === 'success'" class="bi bi-check-lg"></i>
             <span v-else>3</span>
           </div>
-          <span :class="['text-sm font-medium transition-colors', paymentStep === 'success' ? 'text-green-600' : 'text-gray-500']">Complete</span>
+          <span class="step-label mt-2 small fw-medium">Complete</span>
         </div>
       </div>
     </div>
 
-    <!-- Step 1: Payment Form -->
-    <div v-if="paymentStep === 'form'" class="payment-form">
-      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <!-- Header -->
-        <div class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-12 text-white">
-          <div class="text-center">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6">
-              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
+         <!-- Authentication Required Message -->
+     <div v-if="!authStore.isAuthenticated" class="auth-required-modern">
+       <div class="auth-required-card">
+         <div class="auth-required-header text-center mb-4">
+           <div class="auth-required-icon mb-3">
+             <i class="bi bi-person-lock"></i>
             </div>
-            <h2 class="text-3xl font-bold mb-3">Secure Bakong Payment</h2>
-            <p class="text-blue-100 text-lg">Complete your ticket purchase safely</p>
+           <h2 class="auth-required-title mb-3">Authentication Required</h2>
+           <p class="auth-required-subtitle">Please sign in to purchase tickets for this event</p>
+         </div>
+
+         <div class="auth-required-actions">
+           <div class="row g-3">
+             <div class="col-md-6">
+               <a href="/auth/login" class="btn-auth-login w-100 position-relative overflow-hidden text-decoration-none d-block">
+                 <div class="btn-auth-bg position-absolute top-0 start-0 w-100 h-100"></div>
+                 <div class="btn-auth-content position-relative d-flex align-items-center justify-content-center">
+                   <i class="bi bi-box-arrow-in-right me-2"></i>
+                   Sign In
+                 </div>
+               </a>
+             </div>
+             <div class="col-md-6">
+               <a href="/auth/register" class="btn-auth-register w-100 position-relative overflow-hidden text-decoration-none d-block">
+                 <div class="btn-register-bg position-absolute top-0 start-0 w-100 h-100"></div>
+                 <div class="btn-register-content position-relative d-flex align-items-center justify-content-center">
+                   <i class="bi bi-person-plus me-2"></i>
+                   Create Account
+                 </div>
+               </a>
+             </div>
+           </div>
+         </div>
           </div>
         </div>
 
-        <!-- Form Content -->
-        <div class="px-8 py-8">
-          <form @submit.prevent="initiatePayment" class="space-y-6">
-            <!-- Event Summary -->
-            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6 mb-6">
-              <h3 class="font-bold text-gray-900 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                </svg>
-                Ticket Summary
-              </h3>
-              <div class="flex justify-between items-center">
-                <div>
-                  <p class="font-semibold text-gray-900">{{ event?.title }}</p>
-                  <p class="text-sm text-gray-600">{{ event?.category }} • {{ event?.location }}</p>
+     <!-- Step 1: Enhanced Payment Form -->
+     <div v-else-if="paymentStep === 'form'" class="payment-form-modern">
+      <div class="payment-card">
+        <!-- Modern Header -->
+        <div class="payment-header text-center mb-5">
+          <div class="payment-icon-container mb-4">
+            <div class="payment-icon">
+              <i class="bi bi-shield-lock"></i>
                 </div>
-                <div class="text-right">
-                  <p class="text-3xl font-bold text-blue-600">${{ event?.price }}</p>
-                  <p class="text-sm text-gray-500">Total Amount</p>
+            <div class="payment-icon-glow"></div>
                 </div>
+          <h2 class="payment-title mb-3">Secure Payment</h2>
+          <p class="payment-subtitle">Complete your ticket purchase with Bakong</p>
               </div>
+
+        <!-- Enhanced Form Content -->
+        <div class="form-content">
+          <form @submit.prevent="initiatePayment">
+            <!-- Modern Event Summary -->
+            <div class="event-summary-card mb-5">
+              <div class="d-flex align-items-center mb-4">
+                <div class="summary-icon me-3">
+                  <i class="bi bi-ticket-perforated"></i>
+                </div>
+                <h3 class="summary-title mb-0">Ticket Summary</h3>
             </div>
 
-            <!-- Payment Details -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="space-y-2">
-                <label for="merchant_name" class="block text-sm font-semibold text-gray-700 flex items-center">
-                  <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                  </svg>
-                  Merchant Name
-                </label>
-                <input
-                  id="merchant_name"
-                  v-model="paymentForm.merchant_name"
-                  type="text"
-                  required
-                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-900 placeholder-gray-400"
-                  placeholder="Your business name"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <label for="merchant_city" class="block text-sm font-semibold text-gray-700 flex items-center">
-                  <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                  City
-                </label>
-                <input
-                  id="merchant_city"
-                  v-model="paymentForm.merchant_city"
-                  type="text"
-                  required
-                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-900 placeholder-gray-400"
-                  placeholder="Phnom Penh"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <label for="bakong_account" class="block text-sm font-semibold text-gray-700 flex items-center">
-                  <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                  </svg>
-                  Bakong Account
-                </label>
-                <input
-                  id="bakong_account"
-                  v-model="paymentForm.bakong_account"
-                  type="text"
-                  required
-                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-900 placeholder-gray-400"
-                  placeholder="yourname@wing"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <label for="phone_number" class="block text-sm font-semibold text-gray-700 flex items-center">
-                  <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                  </svg>
-                  Phone Number
-                </label>
-                <input
-                  id="phone_number"
-                  v-model="paymentForm.phone_number"
-                  type="tel"
-                  required
-                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-900 placeholder-gray-400"
-                  placeholder="+855123456789"
-                />
-              </div>
-            </div>
-
-            <!-- Security Notice -->
-            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-xl">
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <p class="text-sm text-green-700">
-                  <span class="font-semibold">Secure Payment:</span> Your transaction is protected by advanced encryption
-                </p>
-              </div>
-            </div>
-
-            <!-- Submit Button -->
-            <button
-              type="submit"
-              :disabled="loading"
-              class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 px-8 rounded-2xl font-bold text-lg shadow-xl hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-200 hover:scale-105"
-            >
-              <span v-if="loading" class="flex items-center justify-center">
-                <svg class="animate-spin -ml-1 mr-3 h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Creating Payment...
-              </span>
-              <span v-else class="flex items-center justify-center">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M12 12h-2.99M12 12V9m0 0h2m0 0h2"></path>
-                </svg>
-                Generate QR Code
-              </span>
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 2: QR Code Payment -->
-    <div v-else-if="paymentStep === 'qr'" class="payment-qr">
-      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <!-- Mobile-First Header -->
-        <div class="bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 px-6 py-8 text-white relative overflow-hidden">
-          <!-- Background Pattern -->
-          <div class="absolute inset-0 opacity-10">
-            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 50%, white 1px, transparent 1px); background-size: 50px 50px;"></div>
-          </div>
-          
-          <div class="relative text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-4 backdrop-blur-sm">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M12 12h-2.99M12 12V9m0 0h2m0 0h2"></path>
-              </svg>
-            </div>
-            <h2 class="text-2xl font-bold mb-2">Scan to Pay</h2>
-            <p class="text-purple-100">Use your Bakong app to complete payment</p>
-            
-            <!-- Timer Badge -->
-            <div class="inline-flex items-center bg-red-500/20 backdrop-blur-sm rounded-full px-4 py-2 mt-4">
-              <svg class="w-4 h-4 mr-2 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span class="text-sm font-bold text-red-200">{{ formatTime(timeRemaining) }} remaining</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="px-6 py-8">
-          <!-- QR Code Section -->
-          <div class="text-center mb-8">
-            <!-- QR Code with Phone Frame -->
-            <div class="relative inline-block">
-              <!-- Phone Frame -->
-              <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-[2.5rem] p-2 shadow-2xl phone-frame">
-                <div class="bg-black rounded-[2rem] p-6 relative">
-                  <!-- QR Code -->
-                  <div class="bg-white rounded-2xl p-6 shadow-inner">
-                    <div id="qr-code" class="mx-auto"></div>
+              <div class="row align-items-center">
+                <div class="col-8">
+                  <h4 class="event-title mb-2">{{ event?.title }}</h4>
+                  <div class="event-details">
+                    <span class="event-category">{{ event?.category }}</span>
+                    <span class="event-separator">•</span>
+                    <span class="event-location">{{ event?.location }}</span>
                   </div>
-                  
-                  <!-- Phone Details -->
-                  <div class="mt-4 text-center">
-                    <div class="bg-gray-800 rounded-xl p-3">
-                      <p class="text-xs text-gray-300 mb-1">Transaction ID</p>
-                      <p class="text-sm font-mono text-white">{{ transactionId }}</p>
+                </div>
+                                 <div class="col-4 text-end">
+                   <div class="price-container">
+                     <div class="price-amount">${{ event?.price || '0.00' }}</div>
+                     <div class="price-label">Total Amount</div>
+                   </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- KHQR Payment Method -->
+            <div class="payment-method-selection mb-5">
+              <h4 class="payment-method-title mb-4">Pay with KHQR/Bakong</h4>
+              <div class="khqr-payment-card method-active">
+                <div class="method-icon">
+                  <i class="bi bi-qr-code"></i>
+                </div>
+                <div class="method-info">
+                  <div class="method-name">KHQR Payment</div>
+                  <div class="method-description">Scan QR code with any Cambodian banking app</div>
+                </div>
+                <div class="method-badge khqr-badge">1% FEE ONLY</div>
+              </div>
+              
+              <!-- Supported Banks -->
+              <div class="supported-banks mt-3">
+                <div class="banks-label">Supported by all major banks:</div>
+                <div class="banks-icons">
+                  <div class="bank-icon">ABA</div>
+                  <div class="bank-icon">ACLEDA</div>
+                  <div class="bank-icon">WING</div>
+                  <div class="bank-icon">CANADIA</div>
+                  <div class="bank-icon">PPB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- KHQR Payment Form -->
+            <div class="payment-fields">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <div class="form-field">
+                    <label for="phone_number" class="form-label">
+                      <i class="bi bi-phone field-icon"></i>
+                      Phone Number
+                    </label>
+                    <div class="input-container">
+                      <input
+                        id="phone_number"
+                        v-model="paymentForm.phone_number"
+                        type="tel"
+                        required
+                        class="form-control-modern"
+                        placeholder="+855 12 345 678"
+                      />
+                      <div class="input-focus-border"></div>
                     </div>
                   </div>
                 </div>
-                
-                <!-- Phone Notch -->
-                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 w-20 h-6 bg-black rounded-full"></div>
-              </div>
-              
-              <!-- Floating Amount Badge -->
-              <div class="absolute -top-4 -right-4 bg-green-500 text-white rounded-2xl px-4 py-2 shadow-xl transform rotate-12 floating-badge">
-                <div class="text-center">
-                  <p class="text-xs font-medium">Amount</p>
-                  <p class="text-lg font-bold">${{ event?.price }}</p>
+
+                <div class="col-md-6">
+                  <div class="form-field">
+                    <label for="customer_name" class="form-label">
+                      <i class="bi bi-person field-icon"></i>
+                      Full Name
+                    </label>
+                    <div class="input-container">
+                      <input
+                        id="customer_name"
+                        v-model="paymentForm.customer_name"
+                        type="text"
+                        required
+                        class="form-control-modern"
+                        placeholder="Your full name"
+                      />
+                      <div class="input-focus-border"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Quick Steps -->
-          <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-6">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div class="text-center">
-                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2 step-icon">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                  </svg>
+            <!-- Enhanced Security Notice -->
+            <div class="security-notice mb-4">
+              <div class="d-flex align-items-center">
+                <div class="security-icon me-3">
+                  <i class="bi bi-shield-check"></i>
                 </div>
-                <p class="text-xs font-semibold text-gray-700">Open App</p>
+                <div class="security-text">
+                  <div class="security-title">Secure Payment</div>
+                  <div class="security-subtitle">Your transaction is protected by advanced encryption</div>
+                </div>
+              </div>
               </div>
               
-              <div class="text-center">
-                <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-2 step-icon">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M12 12h-2.99M12 12V9m0 0h2m0 0h2"></path>
-                  </svg>
+            <!-- Modern Submit Button -->
+            <div class="submit-section">
+              <button
+                type="submit"
+                :disabled="loading"
+                class="btn-submit-modern w-100 position-relative overflow-hidden"
+              >
+                <div class="btn-submit-bg position-absolute top-0 start-0 w-100 h-100"></div>
+                <div class="btn-submit-content position-relative d-flex align-items-center justify-content-center">
+                  <div v-if="loading" class="spinner-border spinner-border-sm me-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="text-xs font-semibold text-gray-700">Scan QR</p>
+                  <i v-else class="bi bi-qr-code me-3"></i>
+                  {{ loading ? 'Generating KHQR...' : 'Generate KHQR Payment' }}
+                </div>
+                <div class="btn-submit-glow position-absolute top-0 start-0 w-100 h-100"></div>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
               </div>
               
-              <div class="text-center">
-                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2 step-icon">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+    <!-- Step 2: Modern Processing Payment -->
+    <div v-else-if="paymentStep === 'processing'" class="processing-payment-modern">
+      <div class="processing-payment-card">
+        <!-- Enhanced Processing Header -->
+        <div class="processing-header text-center mb-5">
+          <div class="processing-icon-container mb-4">
+            <div class="processing-icon">
+              <i class="bi bi-credit-card-2-front"></i>
                 </div>
-                <p class="text-xs font-semibold text-gray-700">Confirm</p>
+            <div class="processing-spinner"></div>
+          </div>
+          <h2 class="processing-title mb-3">Processing Payment</h2>
+          <p class="processing-subtitle mb-4">Please wait while we process your {{ getPaymentMethodName() }} payment</p>
               </div>
               
-              <div class="text-center">
-                <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-2 step-icon">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                  </svg>
+        <!-- Processing Steps -->
+        <div class="processing-steps mb-5">
+          <div class="row g-3">
+            <div class="col-6 col-lg-3">
+              <div class="processing-step-item text-center">
+                <div class="step-icon-modern step-blue">
+                  <i class="bi bi-shield-check"></i>
                 </div>
-                <p class="text-xs font-semibold text-gray-700">Get Ticket</p>
+                <div class="step-text">Validating</div>
               </div>
             </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="space-y-3">
-            <button
-              @click="checkPaymentStatus"
-              :disabled="loading"
-              class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
-            >
-              <span v-if="loading" class="flex items-center justify-center">
-                <div class="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
-                Checking Payment...
-              </span>
-              <span v-else class="flex items-center justify-center">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Payment Completed ✨
-              </span>
-            </button>
             
-            <button
-              @click="cancelPayment"
-              class="w-full bg-gray-50 text-gray-600 py-3 px-6 rounded-2xl font-semibold border-2 border-gray-200 hover:bg-gray-100 hover:border-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200"
-            >
-              <span class="flex items-center justify-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-                Cancel Payment
-              </span>
-            </button>
+            <div class="col-6 col-lg-3">
+              <div class="processing-step-item text-center">
+                <div class="step-icon-modern step-purple">
+                  <i class="bi bi-credit-card"></i>
+                </div>
+                <div class="step-text">Processing</div>
+            </div>
           </div>
 
-          <!-- Trust Indicators -->
-          <div class="mt-8 flex items-center justify-center space-x-6 text-xs text-gray-500">
-            <div class="flex items-center">
-              <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-              </svg>
-              Secure
+            <div class="col-6 col-lg-3">
+              <div class="processing-step-item text-center">
+                <div class="step-icon-modern step-green">
+                  <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="step-text">Confirming</div>
+              </div>
+          </div>
+
+            <div class="col-6 col-lg-3">
+              <div class="processing-step-item text-center">
+                <div class="step-icon-modern step-orange">
+                  <i class="bi bi-ticket-perforated"></i>
             </div>
-            <div class="flex items-center">
-              <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-              Fast
+                <div class="step-text">Generating</div>
             </div>
-            <div class="flex items-center">
-              <svg class="w-4 h-4 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-              </svg>
-              Protected
             </div>
           </div>
         </div>
+
+        <!-- Transaction Info Card -->
+        <div class="transaction-info-card text-center mb-4">
+          <div class="transaction-label">Transaction ID</div>
+          <div class="transaction-id">{{ transactionId }}</div>
+                     <div class="amount-info mt-3">
+             <span class="amount-label">Amount: </span>
+             <span class="amount-value">${{ event?.price || '0.00' }}</span>
       </div>
     </div>
 
-    <!-- Step 3: Success State -->
-    <div v-else-if="paymentStep === 'success'" class="payment-success">
-      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <!-- Success Header -->
-        <div class="bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 px-6 py-12 text-white relative overflow-hidden">
-          <!-- Confetti Animation Background -->
-          <div class="absolute inset-0 opacity-20">
-            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25% 25%, white 2px, transparent 2px), radial-gradient(circle at 75% 75%, white 2px, transparent 2px); background-size: 60px 60px; animation: float 6s ease-in-out infinite;"></div>
+        <!-- Processing Message -->
+        <div class="processing-message text-center">
+          <p class="processing-text">
+            <i class="bi bi-hourglass-split me-2"></i>
+            This usually takes just a few seconds...
+          </p>
+        </div>
+      </div>
           </div>
           
-          <div class="relative text-center">
-            <!-- Success Icon with Animation -->
-            <div class="inline-flex items-center justify-center w-24 h-24 bg-white/20 rounded-full mb-6 backdrop-blur-sm animate-bounce">
-              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-              </svg>
+    <!-- Step 3: Modern Success State -->
+    <div v-else-if="paymentStep === 'success'" class="success-payment-modern">
+      <div class="success-payment-card">
+        <!-- Enhanced Success Header -->
+        <div class="success-header text-center mb-5">
+          <div class="success-icon-container mb-4">
+            <div class="success-icon">
+              <i class="bi bi-check-circle-fill"></i>
             </div>
-            <h2 class="text-3xl font-bold mb-3">Payment Successful! 🎉</h2>
-            <p class="text-green-100 text-lg">Your ticket has been generated</p>
+            <div class="success-confetti">
+              <div class="confetti-piece confetti-1"></div>
+              <div class="confetti-piece confetti-2"></div>
+              <div class="confetti-piece confetti-3"></div>
+              <div class="confetti-piece confetti-4"></div>
+              <div class="confetti-piece confetti-5"></div>
+              <div class="confetti-piece confetti-6"></div>
           </div>
+          </div>
+          <h2 class="success-title mb-3">Payment Successful! 🎉</h2>
+          <p class="success-subtitle">Your ticket has been generated and is ready to use</p>
         </div>
 
-        <div class="px-6 py-8">
-          <!-- Success Details -->
-          <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 mb-6">
-            <div class="text-center">
-              <div class="inline-flex items-center bg-green-100 rounded-full px-4 py-2 mb-4">
-                <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                </svg>
-                <span class="text-sm font-semibold text-green-800">Ticket Generated</span>
+        <!-- Ticket Display with QR Code -->
+        <div class="ticket-display mb-5">
+          <div class="ticket-card">
+            <!-- Ticket Header -->
+            <div class="ticket-header">
+              <div class="ticket-icon">
+                <i class="bi bi-ticket-perforated"></i>
+              </div>
+              <div class="ticket-info">
+                <div class="ticket-number">{{ ticket?.ticket_number || 'TICKET-' + Date.now() }}</div>
+                <div class="ticket-status">Valid Ticket</div>
+              </div>
               </div>
               
-              <h3 class="text-xl font-bold text-gray-900 mb-2">{{ event?.title }}</h3>
-              <p class="text-gray-600 mb-4">{{ event?.category }} • {{ event?.location }}</p>
-              
-              <div class="bg-white rounded-xl p-4 shadow-sm">
-                <p class="text-sm text-gray-500 mb-1">Amount Paid</p>
-                <p class="text-2xl font-bold text-green-600">${{ event?.price }}</p>
+            <!-- Event Details -->
+            <div class="ticket-event-details">
+              <h3 class="event-title">{{ event?.title }}</h3>
+              <div class="event-meta">
+                <div class="event-detail">
+                  <i class="bi bi-calendar3"></i>
+                  <span>{{ formatEventDate(event?.event_date) }}</span>
               </div>
+                <div class="event-detail">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>{{ event?.location }}</span>
+                </div>
+                <div class="event-detail">
+                  <i class="bi bi-tag"></i>
+                  <span>{{ event?.category }}</span>
+                </div>
             </div>
           </div>
 
-          <!-- Action Button -->
-          <button
-            @click="$emit('payment-success', ticket)"
-            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105"
-          >
-            <span class="flex items-center justify-center">
-              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-              </svg>
-              View My Ticket
-            </span>
-          </button>
-
-          <!-- Success Features -->
-          <div class="mt-6 grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+            <!-- QR Code Section -->
+            <div class="ticket-qr-section">
+              <div class="qr-container">
+                <canvas ref="ticketQrCanvas" class="ticket-qr-code"></canvas>
               </div>
-              <p class="text-xs font-semibold text-gray-600">Verified</p>
+              <div class="qr-instructions">
+                <p>Show this QR code at the event entrance</p>
+              </div>
             </div>
             
-            <div>
-              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M12 12h-2.99M12 12V9m0 0h2m0 0h2"></path>
-                </svg>
+            <!-- Ticket Footer -->
+            <div class="ticket-footer">
+              <div class="payment-method">
+                <i class="bi bi-credit-card"></i>
+                <span>{{ getPaymentMethodName() }}</span>
               </div>
-              <p class="text-xs font-semibold text-gray-600">QR Ready</p>
-            </div>
-            
-            <div>
-              <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 6h6m-6 0V9a2 2 0 012-2h2a2 2 0 012 2v4m-6 0a2 2 0 002 2h2a2 2 0 002-2"></path>
-                </svg>
-              </div>
-              <p class="text-xs font-semibold text-gray-600">Secured</p>
+                             <div class="amount-paid">
+                 <span class="amount-label">Amount:</span>
+                 <span class="amount-value">${{ event?.price || '0.00' }}</span>
+               </div>
             </div>
           </div>
+            </div>
+            
+        <!-- Enhanced Action Buttons -->
+        <div class="success-actions">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <button
+                @click="downloadTicket"
+                class="btn-download-ticket w-100 position-relative overflow-hidden"
+              >
+                <div class="btn-download-bg position-absolute top-0 start-0 w-100 h-100"></div>
+                <div class="btn-download-content position-relative d-flex align-items-center justify-content-center">
+                  <i class="bi bi-download me-2"></i>
+                  Download Ticket
+              </div>
+                <div class="btn-download-glow position-absolute top-0 start-0 w-100 h-100"></div>
+              </button>
+            </div>
+            <div class="col-md-6">
+              <button
+                                 @click="ticket && $emit('payment-success', ticket)"
+                class="btn-view-ticket w-100 position-relative overflow-hidden"
+              >
+                <div class="btn-view-bg position-absolute top-0 start-0 w-100 h-100"></div>
+                <div class="btn-view-content position-relative d-flex align-items-center justify-content-center">
+                  <i class="bi bi-eye me-2"></i>
+                  View in My Tickets
+          </div>
+                <div class="btn-view-glow position-absolute top-0 start-0 w-100 h-100"></div>
+              </button>
         </div>
       </div>
     </div>
 
-    <!-- Error State -->
-    <div v-else-if="paymentStep === 'error'" class="payment-error">
-      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+      </div>
+    </div>
+
+    <!-- Modern Error State -->
+    <div v-else-if="paymentStep === 'error'" class="error-payment-modern">
+      <div class="error-payment-card">
         <!-- Error Header -->
-        <div class="bg-gradient-to-br from-red-500 via-pink-500 to-rose-600 px-6 py-12 text-white relative overflow-hidden">
-          <div class="relative text-center">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6 backdrop-blur-sm">
-              <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-              </svg>
+        <div class="error-header text-center mb-5">
+          <div class="error-icon-container mb-4">
+            <div class="error-icon">
+              <i class="bi bi-exclamation-triangle"></i>
             </div>
-            <h2 class="text-2xl font-bold mb-3">Payment Failed</h2>
-            <p class="text-red-100">Don't worry, let's try again</p>
           </div>
+          <h2 class="error-title mb-3">Payment Failed</h2>
+          <p class="error-subtitle">Don't worry, let's try again</p>
         </div>
 
-        <div class="px-6 py-8">
           <!-- Error Message -->
-          <div class="bg-red-50 border border-red-200 rounded-2xl p-6 mb-6">
-            <div class="text-center">
-              <svg class="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <h3 class="text-lg font-semibold text-red-800 mb-2">What happened?</h3>
-              <p class="text-red-700">{{ errorMessage }}</p>
+        <div class="error-message-card mb-5">
+          <div class="error-message-icon text-center mb-3">
+            <i class="bi bi-info-circle"></i>
             </div>
+          <h3 class="error-message-title text-center mb-2">What happened?</h3>
+          <p class="error-message-text text-center">{{ errorMessage }}</p>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="space-y-3">
+        <!-- Error Action Buttons -->
+        <div class="error-actions">
+          <div class="row g-3">
+            <div class="col-12">
             <button
               @click="resetPayment"
-              class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-xl hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105"
-            >
-              <span class="flex items-center justify-center">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
+                class="btn-retry w-100 position-relative overflow-hidden"
+              >
+                <div class="btn-retry-bg position-absolute top-0 start-0 w-100 h-100"></div>
+                <div class="btn-retry-content position-relative d-flex align-items-center justify-content-center">
+                  <i class="bi bi-arrow-clockwise me-3"></i>
                 Try Again
-              </span>
+                </div>
+                <div class="btn-retry-glow position-absolute top-0 start-0 w-100 h-100"></div>
             </button>
+            </div>
             
+            <div class="col-12">
             <button
               @click="$emit('payment-cancelled')"
-              class="w-full bg-gray-50 text-gray-600 py-3 px-6 rounded-2xl font-semibold border-2 border-gray-200 hover:bg-gray-100 hover:border-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200"
+                class="btn-cancel-error w-100"
             >
+                <i class="bi bi-arrow-left me-2"></i>
               Cancel & Go Back
             </button>
-          </div>
-
-          <!-- Help Section -->
-          <div class="mt-6 text-center">
-            <p class="text-sm text-gray-500 mb-2">Need help?</p>
-            <div class="flex items-center justify-center space-x-4 text-xs text-gray-400">
-              <span>📧 Support</span>
-              <span>💬 Live Chat</span>
-              <span>📞 Call Us</span>
             </div>
           </div>
         </div>
@@ -509,10 +478,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { BakongKHQR, MerchantInfo, khqrData } from 'bakong-khqr'
-import QRCode from 'qrcode'
+import { ref, onUnmounted, nextTick } from 'vue'
 import axios from 'axios'
+import QRCode from 'qrcode'
+import { useAuthStore } from '@/stores/auth'
 
 interface Event {
   id: number
@@ -531,12 +500,13 @@ const props = defineProps<{
   event: Event
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   'payment-success': [ticket: Ticket]
   'payment-cancelled': []
 }>()
 
-const paymentStep = ref<'form' | 'qr' | 'success' | 'error'>('form')
+const authStore = useAuthStore()
+const paymentStep = ref<'form' | 'qr' | 'processing' | 'success' | 'error'>('form')
 const loading = ref(false)
 const errorMessage = ref('')
 const transactionId = ref('')
@@ -547,135 +517,231 @@ let countdownInterval: NodeJS.Timeout | null = null
 let statusCheckInterval: NodeJS.Timeout | null = null
 
 const paymentForm = ref({
-  merchant_name: '',
-  merchant_city: 'Phnom Penh',
-  bakong_account: '',
-  phone_number: ''
+  payment_method: 'khqr',
+  phone_number: '',
+  customer_name: ''
 })
 
+// Template refs
+const ticketQrCanvas = ref<HTMLCanvasElement>()
+
+const getPaymentMethodName = () => {
+  return 'KHQR/Bakong'
+}
+
+const formatEventDate = (dateString: string) => {
+  if (!dateString) return 'TBD'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const generateTicketQRCode = async () => {
+  if (!ticket.value || !ticketQrCanvas.value) return
+  
+  try {
+    const qrData = JSON.stringify({
+      ticket_id: ticket.value.id,
+      ticket_number: ticket.value.ticket_number,
+      event_id: props.event.id,
+      event_title: props.event.title,
+      user_id: ticket.value.user_id,
+      generated_at: new Date().toISOString(),
+      verification_code: ticket.value.verification_code || `VER-${Date.now()}`
+    })
+
+    await QRCode.toCanvas(ticketQrCanvas.value, qrData, {
+      width: 200,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    })
+  } catch (error) {
+    console.error('QR Code generation failed:', error)
+  }
+}
+
+const downloadTicket = () => {
+  if (!ticketQrCanvas.value || !ticket.value) return
+  
+  // Create a temporary canvas for the full ticket
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  canvas.width = 400
+  canvas.height = 600
+
+  // White background
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  // Add ticket content
+  ctx.fillStyle = '#000000'
+  ctx.font = 'bold 24px Arial'
+  ctx.textAlign = 'center'
+  ctx.fillText('EVENT TICKET', canvas.width / 2, 50)
+
+  ctx.font = '18px Arial'
+  ctx.fillText(props.event.title, canvas.width / 2, 100)
+
+  ctx.font = '14px Arial'
+  ctx.fillText(`Ticket: ${ticket.value.ticket_number}`, canvas.width / 2, 130)
+  ctx.fillText(`Event: ${props.event.location}`, canvas.width / 2, 150)
+     ctx.fillText(`Date: ${formatEventDate(props.event.event_date)}`, canvas.width / 2, 170)
+   ctx.fillText(`Price: $${props.event.price || '0.00'}`, canvas.width / 2, 190)
+
+   // Add QR code
+  const qrImage = ticketQrCanvas.value.toDataURL()
+  const img = new Image()
+  img.onload = () => {
+    ctx.drawImage(img, (canvas.width - 200) / 2, 220, 200, 200)
+    
+    // Add instructions
+    ctx.font = '12px Arial'
+    ctx.fillText('Show this QR code at the event entrance', canvas.width / 2, 470)
+    ctx.fillText('Keep this ticket safe', canvas.width / 2, 490)
+
+    // Download
+    const link = document.createElement('a')
+    link.download = `ticket-${ticket.value?.ticket_number || 'unknown'}.png`
+    link.href = canvas.toDataURL()
+    link.click()
+  }
+  img.src = qrImage
+}
+
+// Removed unused formatCardNumber function since we're not using credit cards
+
+// Card validation function (unused but kept for future use)
+// const validateCardNumber = (cardNumber: string, cardType: string) => {
+//   const cleanNumber = cardNumber.replace(/\s/g, '')
+//   if (cardType === 'visa_card') {
+//     return /^4[0-9]{12}(?:[0-9]{3})?$/.test(cleanNumber)
+//   } else if (cardType === 'mastercard') {
+//     return /^5[1-5][0-9]{14}$/.test(cleanNumber)
+//   }
+//   return false
+// }
+
 const initiatePayment = async () => {
+  // Check if user is authenticated
+  if (!authStore.isAuthenticated) {
+    errorMessage.value = 'Please log in to purchase tickets'
+    paymentStep.value = 'error'
+    return
+  }
+  
   loading.value = true
   errorMessage.value = ''
 
-  console.log('Initiating payment with data:', {
+  // Prepare KHQR payment data
+  const paymentData = {
     event_id: props.event.id,
-    ...paymentForm.value
+    payment_method: 'khqr',
+    phone_number: paymentForm.value.phone_number,
+    customer_name: paymentForm.value.customer_name,
+    amount: props.event.price,
+    currency: 'USD'
+  }
+
+  console.log('Initiating payment with data:', paymentData)
+  console.log('Auth state:', {
+    isAuthenticated: authStore.isAuthenticated,
+    token: authStore.token ? 'present' : 'missing',
+    user: authStore.user ? authStore.user.name : 'no user'
   })
 
   try {
-    const response = await axios.post('/api/payments/initiate', {
-      event_id: props.event.id,
-      ...paymentForm.value
-    })
+    const response = await axios.post('/api/payments/initiate', paymentData)
 
     console.log('Payment response:', response.data)
-
-    if (response.data.status === 'success') {
-      // Use the transaction_id from payment_data, not purchase_id
-      transactionId.value = response.data.data.payment_data.transaction_id
-      await generateQRCode(response.data.data.payment_data)
-      paymentStep.value = 'qr'
-      startCountdown()
-      startStatusChecking()
+    
+        if (response.data.status === 'success') {
+      transactionId.value = response.data.data.transaction_id
+      const khqrData = response.data.data.khqr_data
+      
+      if (response.data.data.status === 'pending') {
+        if (khqrData && khqrData.qr_code) {
+          // Show QR code for payment
+          paymentStep.value = 'qr'
+          // Store KHQR data for QR display
+          // You can add a ref for this data if needed
+          
+          // Start checking payment status
+          startPaymentStatusCheck()
+        } else {
+          // No QR code received, show processing instead
+          paymentStep.value = 'processing'
+          
+          // Start checking payment status
+          startPaymentStatusCheck()
+        }
+      } else if (response.data.data.status === 'completed') {
+        // Payment completed immediately (demo mode)
+        paymentStep.value = 'processing'
+        
+        setTimeout(async () => {
+          ticket.value = response.data.data.ticket || { 
+            id: Date.now(), 
+            ticket_number: 'EP-' + Date.now(),
+            event: props.event,
+            user_id: 1,
+            verification_code: `VER-${Date.now()}`
+          }
+          paymentStep.value = 'success'
+          loading.value = false
+          
+          await nextTick()
+          await generateTicketQRCode()
+        }, 3000)
+      }
     }
   } catch (error: any) {
     console.error('Payment initiation error:', error)
     console.error('Error response:', error.response?.data)
-    errorMessage.value = error.response?.data?.message || error.message || 'Failed to initiate payment'
-    paymentStep.value = 'error'
-  } finally {
-    loading.value = false
-  }
-}
-
-const generateQRCode = async (paymentData: any) => {
-  try {
-    const merchantInfo = new MerchantInfo(
-      paymentData.bakong_account,
-      paymentData.merchant_name,
-      paymentData.merchant_city,
-      Date.now(),
-      'BAKONGKHPPXXX',
-      {
-        currency: khqrData.currency.usd,
-        amount: Math.round(paymentData.amount * 100), // Convert to cents
-        billNumber: paymentData.bill_number,
-        mobileNumber: paymentData.phone_number,
-        storeLabel: paymentData.store_label,
-        terminalLabel: paymentData.terminal_label,
-        expirationTimestamp: paymentData.expiration_time * 1000
-      }
-    )
-
-    const khqr = new BakongKHQR()
-    const qrString = khqr.generateMerchant(merchantInfo)
-
-    await nextTick()
-    const qrElement = document.getElementById('qr-code')
-    if (qrElement) {
-      qrElement.innerHTML = ''
-      await QRCode.toCanvas(qrElement, qrString, {
-        width: 256,
-        margin: 2
+    console.error('Validation errors:', error.response?.data?.errors)
+    console.error('Request headers:', error.config?.headers)
+    
+    // Show detailed validation errors
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      const validationErrors = error.response.data.errors
+      console.error('Detailed validation errors:')
+      Object.keys(validationErrors).forEach(field => {
+        console.error(`- ${field}:`, validationErrors[field])
       })
-    }
-  } catch (error) {
-    console.error('QR Code generation failed:', error)
-    errorMessage.value = 'Failed to generate QR code'
-    paymentStep.value = 'error'
-  }
-}
-
-const checkPaymentStatus = async () => {
-  if (!transactionId.value) return
-
-  console.log('Checking payment status for transaction:', transactionId.value)
-  
-  loading.value = true
-  try {
-    const response = await axios.post('/api/payments/status', {
-      transaction_id: transactionId.value
-    })
-    
-    if (response.data.status === 'success') {
-      const paymentStatus = response.data.data.payment_status
       
-      if (paymentStatus === 'completed') {
-        ticket.value = response.data.data.ticket
-        paymentStep.value = 'success'
-        stopCountdown()
-        stopStatusChecking()
-      } else if (paymentStatus === 'expired' || paymentStatus === 'cancelled') {
-        errorMessage.value = 'Payment has expired or been cancelled'
-        paymentStep.value = 'error'
-        stopCountdown()
-        stopStatusChecking()
-      }
+      // Create a more detailed error message
+      const errorMessages = Object.values(validationErrors).flat()
+      errorMessage.value = errorMessages.join(', ') || 'Validation failed'
+    } else if (error.response?.status === 500) {
+      errorMessage.value = 'Server error occurred. Please try again or contact support.'
+    } else if (error.response?.data?.message) {
+      errorMessage.value = error.response.data.message
+    } else if (error.message) {
+      errorMessage.value = error.message
+    } else {
+      errorMessage.value = 'Failed to initiate payment. Please try again.'
     }
-  } catch (error: any) {
-    console.error('Status check failed:', error)
-  } finally {
+    
+    paymentStep.value = 'error'
     loading.value = false
   }
 }
 
-const cancelPayment = async () => {
-  if (!transactionId.value) return
+// QR code generation removed - no longer needed for new payment methods
 
-  try {
-    await axios.post('/api/payments/cancel', {
-      transaction_id: transactionId.value
-    })
-    
-    paymentStep.value = 'form'
-    transactionId.value = ''
-    stopCountdown()
-    stopStatusChecking()
-    emit('payment-cancelled')
-  } catch (error) {
-    console.error('Cancel payment failed:', error)
-  }
-}
+// Payment status checking and cancellation functions (unused in current implementation but kept for future use)
+// const checkPaymentStatus = async () => { ... }
+// const cancelPayment = async () => { ... }
 
 const resetPayment = () => {
   paymentStep.value = 'form'
@@ -686,27 +752,12 @@ const resetPayment = () => {
   stopStatusChecking()
 }
 
-const startCountdown = () => {
-  countdownInterval = setInterval(() => {
-    timeRemaining.value--
-    if (timeRemaining.value <= 0) {
-      errorMessage.value = 'Payment has expired'
-      paymentStep.value = 'error'
-      stopCountdown()
-      stopStatusChecking()
-    }
-  }, 1000)
-}
-
+// Timer and status checking functions - simplified for instant payments
 const stopCountdown = () => {
   if (countdownInterval) {
     clearInterval(countdownInterval)
     countdownInterval = null
   }
-}
-
-const startStatusChecking = () => {
-  statusCheckInterval = setInterval(checkPaymentStatus, 10000) // Check every 10 seconds
 }
 
 const stopStatusChecking = () => {
@@ -716,10 +767,33 @@ const stopStatusChecking = () => {
   }
 }
 
-const formatTime = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60)
-  const remainingSeconds = seconds % 60
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+const startPaymentStatusCheck = () => {
+  // Check payment status every 5 seconds
+  statusCheckInterval = setInterval(async () => {
+    try {
+      const response = await axios.post('/api/payments/status', {
+        transaction_id: transactionId.value
+      })
+      
+      if (response.data.data.payment_status === 'completed') {
+        stopStatusChecking()
+        ticket.value = response.data.data.ticket
+        paymentStep.value = 'success'
+        loading.value = false
+        
+        await nextTick()
+        await generateTicketQRCode()
+      } else if (response.data.data.payment_status === 'failed') {
+        stopStatusChecking()
+        errorMessage.value = 'Payment failed. Please try again.'
+        paymentStep.value = 'error'
+        loading.value = false
+      }
+    } catch (error) {
+      console.error('Status check error:', error)
+      // Continue checking, don't stop on network errors
+    }
+  }, 5000) // Check every 5 seconds
 }
 
 onUnmounted(() => {
@@ -729,12 +803,1169 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.bakong-payment {
-  min-height: 400px;
+/* Modern Payment Experience Styles */
+.modern-payment-experience {
+  min-height: 600px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(16, 185, 129, 0.1) 50%, rgba(0, 0, 0, 0.9) 100%);
+  border-radius: 24px;
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.payment-form, .payment-qr, .payment-success, .payment-error {
-  animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+/* Enhanced Progress Indicator */
+.progress-section {
+  margin-bottom: 2rem;
+}
+
+.progress-container {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progress-step {
+  flex: none;
+  min-width: 80px;
+}
+
+.step-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 3px solid transparent;
+}
+
+.step-pending {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.step-active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  animation: pulse 2s infinite;
+}
+
+.step-completed {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+}
+
+.step-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.progress-line {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-completed {
+  width: 100%;
+}
+
+/* Payment Form Modern */
+.payment-form-modern {
+  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 40px;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.payment-header {
+  margin-bottom: 2rem;
+}
+
+.payment-icon-container {
+  position: relative;
+  display: inline-block;
+}
+
+.payment-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+.payment-icon-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%);
+  animation: iconGlow 2s ease-in-out infinite alternate;
+}
+
+.payment-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.payment-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.2rem;
+}
+
+/* Payment Method Selection */
+.payment-method-selection {
+  margin-bottom: 2rem;
+}
+
+.payment-method-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+}
+
+.payment-method-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.payment-method-card:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+}
+
+.method-active {
+  border-color: #10b981 !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.1) 100%);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.method-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: white;
+  margin: 0 auto 16px;
+  transition: all 0.3s ease;
+}
+
+.payment-method-card:hover .method-icon {
+  transform: scale(1.1);
+}
+
+.method-active .method-icon {
+  animation: pulse 2s infinite;
+}
+
+.method-info {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.method-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.method-description {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+ .method-badge {
+   position: absolute;
+   top: 12px;
+   right: 12px;
+   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+   color: white;
+   padding: 4px 12px;
+   border-radius: 12px;
+   font-size: 0.75rem;
+   font-weight: 700;
+   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+ }
+
+ .khqr-badge {
+   background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4) !important;
+ }
+
+ .khqr-payment-card {
+   background: rgba(255, 255, 255, 0.05);
+   border: 2px solid #10b981;
+   border-radius: 16px;
+   padding: 20px;
+   position: relative;
+   overflow: hidden;
+   backdrop-filter: blur(10px);
+   background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.1) 100%);
+   box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+ }
+
+ .supported-banks {
+   text-align: center;
+   margin-top: 1rem;
+ }
+
+ .banks-label {
+   color: rgba(255, 255, 255, 0.7);
+   font-size: 0.9rem;
+   margin-bottom: 0.5rem;
+ }
+
+ .banks-icons {
+   display: flex;
+   justify-content: center;
+   gap: 0.5rem;
+   flex-wrap: wrap;
+ }
+
+ .bank-icon {
+   background: rgba(255, 255, 255, 0.1);
+   border: 1px solid rgba(255, 255, 255, 0.2);
+   border-radius: 8px;
+   padding: 4px 8px;
+   font-size: 0.75rem;
+   font-weight: 600;
+   color: rgba(255, 255, 255, 0.8);
+   backdrop-filter: blur(5px);
+ }
+
+/* Event Summary Card */
+.event-summary-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.summary-icon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.summary-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+}
+
+.event-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+}
+
+.event-details {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.event-separator {
+  margin: 0 8px;
+  color: rgba(16, 185, 129, 0.7);
+}
+
+.price-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.price-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.price-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+/* Modern Form Fields */
+.payment-fields {
+  margin-bottom: 2rem;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.field-icon {
+  margin-right: 8px;
+  color: #10b981;
+  font-size: 1.1rem;
+}
+
+.input-container {
+  position: relative;
+}
+
+.form-control-modern {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.form-control-modern:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.form-control-modern::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.input-focus-border {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #10b981, #059669);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 1px;
+}
+
+.form-control-modern:focus + .input-focus-border {
+  width: 100%;
+}
+
+/* Security Notice */
+.security-notice {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 4px solid #10b981;
+}
+
+.security-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+}
+
+.security-title {
+  font-weight: 700;
+  color: white;
+  font-size: 1rem;
+}
+
+.security-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+/* Submit Button */
+.submit-section {
+  margin-top: 2rem;
+}
+
+.btn-submit-modern {
+  padding: 18px 32px;
+  border: none;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+}
+
+.btn-submit-bg {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 16px;
+}
+
+.btn-submit-content {
+  color: white;
+  z-index: 2;
+  font-size: 1.1rem;
+}
+
+.btn-submit-glow {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  opacity: 0;
+  border-radius: 16px;
+  transition: opacity 0.3s ease;
+}
+
+.btn-submit-modern:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5);
+}
+
+.btn-submit-modern:hover .btn-submit-glow {
+  opacity: 1;
+}
+
+.btn-submit-modern:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.btn-submit-modern:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* QR Payment Modern */
+.qr-payment-modern {
+  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.qr-payment-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 40px;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.qr-header {
+  margin-bottom: 2rem;
+}
+
+.qr-icon-container {
+  position: relative;
+  display: inline-block;
+}
+
+.qr-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+}
+
+.qr-icon-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.qr-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.qr-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.2rem;
+}
+
+.timer-badge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 50px;
+  padding: 12px 20px;
+  backdrop-filter: blur(10px);
+  animation: timerPulse 1s ease-in-out infinite;
+}
+
+.timer-icon {
+  margin-right: 8px;
+  color: #ef4444;
+  font-size: 1.1rem;
+}
+
+.timer-text {
+  color: #fecaca;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* QR Code Display */
+.qr-display-section {
+  text-align: center;
+}
+
+.qr-code-container {
+  position: relative;
+  display: inline-block;
+}
+
+.phone-mockup {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border-radius: 40px;
+  padding: 8px;
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  position: relative;
+  transform: scale(1);
+  transition: transform 0.3s ease;
+}
+
+.phone-mockup:hover {
+  transform: scale(1.02);
+}
+
+.phone-screen {
+  background: #000000;
+  border-radius: 32px;
+  padding: 30px;
+  position: relative;
+}
+
+.phone-notch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 24px;
+  background: #000000;
+  border-radius: 12px;
+  z-index: 10;
+}
+
+.qr-code-area {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.qr-code-canvas {
+  border-radius: 8px;
+  animation: qrGlow 3s ease-in-out infinite;
+}
+
+.transaction-info {
+  background: #1f2937;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.transaction-label {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+.transaction-id {
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.price-badge {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  transform: rotate(12deg);
+  animation: float 4s ease-in-out infinite;
+}
+
+.price-badge-content {
+  text-align: center;
+}
+
+.price-badge-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.price-badge-amount {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+/* Payment Steps Guide */
+.payment-steps-guide {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.payment-step-item {
+  padding: 16px;
+}
+
+.step-icon-modern {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  margin: 0 auto 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.step-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.step-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.step-green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.step-orange {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.step-icon-modern:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.step-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* QR Actions */
+.qr-actions {
+  margin-top: 2rem;
+}
+
+.btn-check-payment {
+  padding: 18px 32px;
+  border: none;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+  margin-bottom: 12px;
+}
+
+.btn-check-bg {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 16px;
+}
+
+.btn-check-content {
+  color: white;
+  z-index: 2;
+}
+
+.btn-check-glow {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  opacity: 0;
+  border-radius: 16px;
+  transition: opacity 0.3s ease;
+}
+
+.btn-check-payment:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5);
+}
+
+.btn-check-payment:hover .btn-check-glow {
+  opacity: 1;
+}
+
+.btn-cancel-payment {
+  padding: 16px 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-cancel-payment:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Success Payment Modern */
+.success-payment-modern {
+  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.success-payment-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 40px;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.success-header {
+  margin-bottom: 2rem;
+}
+
+.success-icon-container {
+  position: relative;
+  display: inline-block;
+}
+
+.success-icon {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: white;
+  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+  animation: successBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.success-confetti {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confetti 3s ease-out infinite;
+}
+
+.confetti-1 {
+  background: #10b981;
+  top: 20%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.confetti-2 {
+  background: #059669;
+  top: 30%;
+  right: 20%;
+  animation-delay: 0.5s;
+}
+
+.confetti-3 {
+  background: #047857;
+  bottom: 30%;
+  left: 30%;
+  animation-delay: 1s;
+}
+
+.confetti-4 {
+  background: #065f46;
+  bottom: 20%;
+  right: 30%;
+  animation-delay: 1.5s;
+}
+
+.confetti-5 {
+  background: #10b981;
+  top: 50%;
+  left: 10%;
+  animation-delay: 2s;
+}
+
+.confetti-6 {
+  background: #059669;
+  top: 50%;
+  right: 10%;
+  animation-delay: 2.5s;
+}
+
+.success-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.success-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.2rem;
+}
+
+/* Success Details */
+.success-details {
+  text-align: center;
+}
+
+.ticket-generated-badge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 50px;
+  padding: 12px 24px;
+  backdrop-filter: blur(10px);
+}
+
+.badge-icon {
+  margin-right: 12px;
+  color: #10b981;
+  font-size: 1.2rem;
+}
+
+.badge-text {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.event-success-info {
+  margin: 2rem 0;
+}
+
+.event-success-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+}
+
+.event-success-meta {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+}
+
+.event-success-separator {
+  margin: 0 12px;
+  color: rgba(16, 185, 129, 0.7);
+}
+
+.payment-success-amount {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.amount-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.amount-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Success Actions */
+.success-actions {
+  margin-top: 2rem;
+}
+
+.btn-view-ticket {
+  padding: 20px 40px;
+  border: none;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 35px rgba(59, 130, 246, 0.4);
+}
+
+.btn-view-bg {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 16px;
+}
+
+.btn-view-content {
+  color: white;
+  z-index: 2;
+}
+
+.btn-view-glow {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  opacity: 0;
+  border-radius: 16px;
+  transition: opacity 0.3s ease;
+}
+
+.btn-view-ticket:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(59, 130, 246, 0.5);
+}
+
+.btn-view-ticket:hover .btn-view-glow {
+  opacity: 1;
+}
+
+/* Error Payment Modern */
+.error-payment-modern {
+  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.error-payment-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 40px;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.error-header {
+  margin-bottom: 2rem;
+}
+
+.error-icon-container {
+  display: inline-block;
+}
+
+.error-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+  animation: errorShake 0.8s ease-in-out;
+}
+
+.error-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #ef4444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.error-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.2rem;
+}
+
+.error-message-card {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.error-message-icon {
+  font-size: 2rem;
+  color: #ef4444;
+}
+
+.error-message-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+}
+
+.error-message-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+}
+
+.error-actions {
+  margin-top: 2rem;
+}
+
+.btn-retry {
+  padding: 18px 32px;
+  border: none;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+  margin-bottom: 12px;
+}
+
+.btn-retry-bg {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 16px;
+}
+
+.btn-retry-content {
+  color: white;
+  z-index: 2;
+}
+
+.btn-retry-glow {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  opacity: 0;
+  border-radius: 16px;
+  transition: opacity 0.3s ease;
+}
+
+.btn-retry:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+}
+
+.btn-retry:hover .btn-retry-glow {
+  opacity: 1;
+}
+
+.btn-cancel-error {
+  padding: 16px 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-cancel-error:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideInUp {
@@ -748,111 +1979,38 @@ onUnmounted(() => {
   }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-10px) rotate(2deg);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
-  }
-}
-
-/* QR Code Container Glow */
-#qr-code {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* Progress Bar Animation */
-.progress-bar {
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Button Hover Effects */
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
-/* Phone Frame Realistic Shadow */
-.phone-frame {
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-/* Floating Animation for Amount Badge */
-.floating-badge {
-  animation: float 4s ease-in-out infinite;
-}
-
-/* Success Confetti Animation */
-@keyframes confetti {
-  0% {
-    transform: translateY(0) rotateZ(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-100px) rotateZ(720deg);
-    opacity: 0;
-  }
-}
-
-/* Loading Spinner Enhancement */
-.custom-spinner {
-  border-width: 3px;
-  border-style: solid;
-  border-color: transparent;
-  border-top-color: currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Card Entrance Animation */
-.card-entrance {
-  animation: cardSlide 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes cardSlide {
-  0% {
-    opacity: 0;
-    transform: translateY(50px) rotateX(10deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) rotateX(0deg);
-  }
-}
-
-/* Step Icon Animation */
-.step-icon {
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.step-icon:hover {
-  transform: scale(1.1) rotate(5deg);
-}
-
-/* Countdown Timer */
-.countdown-timer {
-  animation: pulse 2s infinite;
-}
-
 @keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes iconGlow {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes timerPulse {
   0%, 100% {
     opacity: 1;
   }
@@ -861,14 +2019,574 @@ button:hover {
   }
 }
 
-/* Responsive Adjustments */
-@media (max-width: 640px) {
-  .phone-frame {
+@keyframes qrGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(12deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(8deg);
+  }
+}
+
+@keyframes successBounce {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotateZ(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120px) rotateZ(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes errorShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modern-payment-experience {
+    padding: 15px;
+  }
+  
+  .payment-card,
+  .qr-payment-card,
+  .success-payment-card,
+  .error-payment-card {
+    padding: 24px;
+  }
+  
+  .progress-container {
+    padding: 16px;
+  }
+  
+  .step-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+  
+  .step-label {
+    font-size: 0.75rem;
+  }
+  
+  .payment-title,
+  .qr-title,
+  .success-title,
+  .error-title {
+    font-size: 2rem;
+  }
+  
+  .phone-mockup {
     transform: scale(0.9);
   }
   
-  .floating-badge {
-    transform: scale(0.8) rotate(8deg);
+  .price-badge {
+    transform: scale(0.85) rotate(8deg);
+  }
+  
+  .step-icon-modern {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .progress-step {
+    min-width: 60px;
+  }
+  
+  .step-circle {
+    width: 35px;
+    height: 35px;
+    font-size: 0.8rem;
+  }
+  
+  .step-label {
+    font-size: 0.7rem;
+  }
+  
+  .payment-title,
+  .qr-title,
+  .success-title,
+  .error-title {
+    font-size: 1.8rem;
+  }
+  
+  .phone-mockup {
+    transform: scale(0.8);
+  }
+}
+
+/* Processing Payment Styles */
+.processing-payment-modern {
+  padding: 40px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.processing-payment-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 40px;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.processing-header {
+  margin-bottom: 2rem;
+}
+
+.processing-icon-container {
+  position: relative;
+  display: inline-block;
+}
+
+.processing-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: white;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.processing-spinner {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 100px;
+  height: 100px;
+  border: 3px solid transparent;
+  border-top: 3px solid #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.processing-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.processing-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+}
+
+.processing-steps {
+  margin-bottom: 2rem;
+}
+
+.processing-step-item {
+  padding: 20px;
+}
+
+.transaction-info-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.transaction-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.transaction-id {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #10b981;
+  font-family: 'Courier New', monospace;
+}
+
+.amount-info {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.amount-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.amount-value {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.processing-message {
+  margin-top: 2rem;
+}
+
+.processing-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Ticket Display Styles */
+.ticket-display {
+  display: flex;
+  justify-content: center;
+}
+
+.ticket-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 400px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.ticket-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981 0%, #059669 50%, #10b981 100%);
+}
+
+.ticket-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px dashed rgba(16, 185, 129, 0.3);
+}
+
+.ticket-icon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  margin-right: 15px;
+}
+
+.ticket-info {
+  flex: 1;
+}
+
+.ticket-number {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  font-family: 'Courier New', monospace;
+}
+
+.ticket-status {
+  font-size: 0.9rem;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.ticket-event-details {
+  margin-bottom: 25px;
+}
+
+.event-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 15px;
+  line-height: 1.3;
+}
+
+.event-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-detail {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+.event-detail i {
+  width: 18px;
+  margin-right: 10px;
+  color: #10b981;
+}
+
+.ticket-qr-section {
+  text-align: center;
+  margin-bottom: 25px;
+  padding: 20px;
+  background: rgba(16, 185, 129, 0.05);
+  border-radius: 15px;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.qr-container {
+  display: inline-block;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+}
+
+.ticket-qr-code {
+  border-radius: 8px;
+}
+
+.qr-instructions {
+  margin: 0;
+}
+
+.qr-instructions p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 500;
+}
+
+.ticket-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 2px dashed rgba(16, 185, 129, 0.3);
+  font-size: 0.9rem;
+}
+
+.payment-method {
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+}
+
+.payment-method i {
+  margin-right: 8px;
+  color: #10b981;
+}
+
+.amount-paid {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.amount-label {
+  color: #6b7280;
+  margin-right: 5px;
+}
+
+.amount-value {
+  color: #10b981;
+  font-size: 1.1rem;
+}
+
+/* Download Button Styles */
+.btn-download-ticket {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-download-ticket:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+.btn-download-bg {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 12px;
+}
+
+.btn-download-content {
+  z-index: 2;
+}
+
+.btn-download-glow {
+  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.4) 0%, transparent 70%);
+    opacity: 0;
+  transition: opacity 0.3s ease;
+  }
+
+.btn-download-ticket:hover .btn-download-glow {
+    opacity: 1;
+}
+
+/* Authentication Required Styles */
+.auth-required-modern {
+  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-required-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 40px;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.auth-required-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+.auth-required-title {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-required-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+}
+
+.btn-auth-login, .btn-auth-register {
+  padding: 16px 24px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  color: white;
+}
+
+.btn-auth-login:hover, .btn-auth-register:hover {
+  transform: translateY(-3px) scale(1.02);
+  text-decoration: none;
+  color: white;
+}
+
+.btn-auth-bg {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 16px;
+}
+
+.btn-register-bg {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 16px;
+}
+
+.btn-auth-content, .btn-register-content {
+  z-index: 2;
+}
+
+.btn-auth-login:hover {
+  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5);
+}
+
+.btn-auth-register:hover {
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ticket-card {
+    margin: 0 10px;
+    padding: 20px;
+  }
+  
+  .event-title {
+    font-size: 1.2rem;
+  }
+  
+  .ticket-footer {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .auth-required-card {
+    padding: 24px;
+  }
+  
+  .auth-required-title {
+    font-size: 1.6rem;
   }
 }
 </style>
