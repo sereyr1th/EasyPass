@@ -1,7 +1,8 @@
-# Railway configuration for Laravel project
+# Railway configuration for Laravel project - Force Nixpacks
 [build]
 builder = "nixpacks"
 nixpacksConfigPath = "nixpacks.toml"
+nixpacksVersion = "1.21.0"
 
 [deploy]
 startCommand = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
