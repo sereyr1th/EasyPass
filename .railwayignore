@@ -1,6 +1,6 @@
-# Railway ignore file
+# Railway ignore file - Backend only deployment
+frontend/
 node_modules/
-frontend/node_modules/
 backend/vendor/
 backend/storage/logs/
 backend/storage/framework/cache/
@@ -8,7 +8,13 @@ backend/storage/framework/sessions/
 backend/storage/framework/views/
 .git/
 *.log
-.env.local
-.env.*.local
+.env*
+!.env.example
 dist/
 build/
+docker-compose.yml
+start-*.sh
+stop-*.sh
+test-api.html
+*.md
+!README.md
