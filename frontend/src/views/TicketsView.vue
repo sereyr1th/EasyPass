@@ -83,10 +83,19 @@
                 <button
                   v-if="ticket.status === 'valid' && canCancel(ticket)"
                   @click="cancelTicket(ticket.id)"
-                  class="btn btn-outline-danger btn-sm"
+                  class="btn btn-outline-warning btn-sm"
                 >
-                  <i class="bi bi-x-circle me-2"></i>Cancel
+                  <i class="bi bi-arrow-clockwise me-2"></i>Cancel & Refund
                 </button>
+                
+                <!-- Show non-refundable notice -->
+                <div
+                  v-else-if="ticket.status === 'valid' && !isRefundable(ticket)"
+                  class="alert alert-info alert-sm p-2 mb-0"
+                >
+                  <i class="bi bi-info-circle me-1"></i>
+                  <small>Non-refundable event</small>
+                </div>
               </div>
             </div>
           </div>
@@ -133,12 +142,26 @@ const canCancel = (ticket: any) => {
   if (!ticket.event?.event_date) return false
   const eventDate = new Date(ticket.event.event_date)
   const hoursUntilEvent = (eventDate.getTime() - Date.now()) / (1000 * 60 * 60)
-  return hoursUntilEvent > 24 // Can cancel if more than 24 hours before event
+  return hoursUntilEvent > 24 && ticket.event.refundable // Can cancel if more than 24 hours before event and event is refundable
+}
+
+const isRefundable = (ticket: any) => {
+  return ticket.event?.refundable || false
 }
 
 const cancelTicket = async (ticketId: number) => {
-  if (confirm('Are you sure you want to cancel this ticket? This action cannot be undone.')) {
-    await ticketsStore.cancelTicket(ticketId)
+  const ticket = ticketsStore.tickets.find(t => t.id === ticketId)
+  const refundMessage = ticket?.event?.refundable 
+    ? 'Your ticket will be cancelled and a refund will be processed. The refund will appear in your account within 5-10 business days.'
+    : 'Your ticket will be cancelled. No refund will be processed.'
+  
+  if (confirm(`Are you sure you want to cancel this ticket?\n\n${refundMessage}\n\nThis action cannot be undone.`)) {
+    try {
+      await ticketsStore.cancelTicket(ticketId)
+      // Success message will be shown by the store
+    } catch (error) {
+      console.error('Failed to cancel ticket:', error)
+    }
   }
 }
 

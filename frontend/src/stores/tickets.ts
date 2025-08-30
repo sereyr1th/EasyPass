@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
+import { useNotifications } from '@/composables/useNotifications'
 
 export interface Ticket {
   id: number
@@ -45,6 +46,9 @@ export interface TicketValidation {
 }
 
 export const useTicketsStore = defineStore('tickets', () => {
+  // Notifications
+  const { success: showSuccess, error: showError } = useNotifications()
+  
   // State
   const tickets = ref<Ticket[]>([])
   const currentTicket = ref<Ticket | null>(null)
@@ -196,17 +200,24 @@ export const useTicketsStore = defineStore('tickets', () => {
           currentTicket.value.status = 'cancelled'
         }
         
+        // Show success notification with refund info
+        const refundInfo = response.data.refund_info || response.data.message
+        showSuccess('Ticket Cancelled', refundInfo)
+        
         return { 
           success: true,
           message: response.data.message 
         }
       } else {
-        setError(response.data.message || 'Failed to cancel ticket')
-        return { success: false, message: response.data.message }
+        const errorMsg = response.data.message || 'Failed to cancel ticket'
+        setError(errorMsg)
+        showError('Cancellation Failed', errorMsg)
+        return { success: false, message: errorMsg }
       }
     } catch (err: any) {
       const message = err.response?.data?.message || 'Failed to cancel ticket'
       setError(message)
+      showError('Cancellation Failed', message)
       return { success: false, message }
     } finally {
       loading.value = false

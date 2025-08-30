@@ -236,8 +236,29 @@ class TicketController extends Controller
             ], 404);
         }
 
+        // Check if event allows refunds
+        if (!$ticket->event->refundable) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This event does not allow ticket refunds'
+            ], 400);
+        }
+
         // Check if ticket can be cancelled (e.g., 24 hours before event)
-        if ($ticket->event->event_date->diffInHours(now()) < 24) {
+        $eventDate = $ticket->event->event_date;
+        $now = now();
+        
+        // Check if event is in the past
+        if ($eventDate->isPast()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cannot cancel tickets for past events'
+            ], 400);
+        }
+        
+        // Check if less than 24 hours until event
+        $hoursUntilEvent = $now->diffInHours($eventDate, false);
+        if ($hoursUntilEvent < 24) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Tickets cannot be cancelled less than 24 hours before the event'
@@ -254,11 +275,54 @@ class TicketController extends Controller
         try {
             DB::beginTransaction();
 
+            $purchase = $ticket->purchase;
+            $refundProcessed = false;
+            $refundMessage = '';
+
+            // Process Stripe refund if payment was made via Stripe
+            if ($purchase && $purchase->payment_method === 'stripe' && $purchase->stripe_payment_intent_id) {
+                try {
+                    \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+                    
+                    $refund = \Stripe\Refund::create([
+                        'payment_intent' => $purchase->stripe_payment_intent_id,
+                        'reason' => 'requested_by_customer',
+                        'metadata' => [
+                            'ticket_id' => $ticket->id,
+                            'event_id' => $ticket->event_id,
+                            'user_id' => $ticket->user_id,
+                        ]
+                    ]);
+
+                    if ($refund->status === 'succeeded') {
+                        $refundProcessed = true;
+                        $refundMessage = 'Refund of $' . number_format($purchase->amount_paid, 2) . ' has been processed and will appear in your account within 5-10 business days.';
+                    }
+
+                    \Log::info('Stripe refund processed', [
+                        'refund_id' => $refund->id,
+                        'ticket_id' => $ticket->id,
+                        'amount' => $refund->amount / 100
+                    ]);
+
+                } catch (\Stripe\Exception\ApiErrorException $e) {
+                    \Log::error('Stripe refund failed', [
+                        'error' => $e->getMessage(),
+                        'ticket_id' => $ticket->id,
+                        'payment_intent_id' => $purchase->stripe_payment_intent_id
+                    ]);
+                    // Continue with cancellation even if refund fails - admin can process manually
+                    $refundMessage = 'Ticket cancelled. Refund processing failed - please contact support for manual refund.';
+                }
+            }
+
             // Update ticket status
             $ticket->update(['status' => 'cancelled']);
 
             // Update purchase status
-            $ticket->purchase->update(['payment_status' => 'refunded']);
+            if ($purchase) {
+                $purchase->update(['payment_status' => $refundProcessed ? 'refunded' : 'cancelled']);
+            }
 
             // Decrease event attendee count
             $ticket->event->decrement('current_attendees');
@@ -267,7 +331,8 @@ class TicketController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Ticket cancelled successfully'
+                'message' => 'Ticket cancelled successfully',
+                'refund_info' => $refundMessage ?: 'Ticket cancelled successfully'
             ]);
 
         } catch (\Exception $e) {

@@ -24,14 +24,34 @@ class Event extends Model
         'current_attendees',
         'image_url',
         'status',
-        'created_by'
+        'created_by',
+        'refundable'
     ];
 
     protected $casts = [
         'event_date' => 'datetime',
         'registration_deadline' => 'datetime',
         'price' => 'decimal:2',
+        'refundable' => 'boolean',
     ];
+
+    /**
+     * Get the full image URL
+     */
+    public function getImageUrlAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+        
+        // If it's already a full URL, return as is
+        if (str_starts_with($value, 'http')) {
+            return $value;
+        }
+        
+        // If it's a relative path, make it a full URL
+        return config('app.url') . $value;
+    }
 
     /**
      * Get the user who created this event

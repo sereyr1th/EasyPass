@@ -136,19 +136,29 @@
                   </div>
                 </div>
 
-                <div class="d-grid gap-2 d-md-flex">
-                  <RouterLink
-                    :to="{ name: 'edit-event', params: { id: event.id } }"
-                    class="btn btn-outline-primary btn-sm flex-md-fill"
+                <div class="d-grid gap-2">
+                  <div class="d-flex gap-2">
+                    <RouterLink
+                      :to="{ name: 'edit-event', params: { id: event.id } }"
+                      class="btn btn-outline-primary btn-sm flex-fill"
+                    >
+                      <i class="bi bi-pencil me-1"></i>Edit
+                    </RouterLink>
+                    <RouterLink
+                      :to="{ name: 'event-detail', params: { id: event.id } }"
+                      class="btn btn-outline-secondary btn-sm flex-fill"
+                    >
+                      <i class="bi bi-eye me-1"></i>View
+                    </RouterLink>
+                  </div>
+                  <button
+                    v-if="event.current_attendees === 0"
+                    @click="deleteEvent(event)"
+                    class="btn btn-outline-danger btn-sm w-100"
+                    :disabled="eventsStore.loading"
                   >
-                    <i class="bi bi-pencil me-2"></i>Edit
-                  </RouterLink>
-                  <RouterLink
-                    :to="{ name: 'event-detail', params: { id: event.id } }"
-                    class="btn btn-outline-secondary btn-sm flex-md-fill"
-                  >
-                    <i class="bi bi-eye me-2"></i>View
-                  </RouterLink>
+                    <i class="bi bi-trash me-2"></i>Delete Event
+                  </button>
                 </div>
               </div>
             </div>
@@ -177,9 +187,12 @@ import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useEventsStore } from '@/stores/events'
+import { useNotifications } from '@/composables/useNotifications'
+import type { Event } from '@/stores/events'
 
 const authStore = useAuthStore()
 const eventsStore = useEventsStore()
+const { success: showSuccess, error: showError } = useNotifications()
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -190,6 +203,21 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit'
   }).format(date)
+}
+
+const deleteEvent = async (event: Event) => {
+  const confirmMessage = `Are you sure you want to delete "${event.title}"?\n\nThis action cannot be undone.`
+  
+  if (!confirm(confirmMessage)) {
+    return
+  }
+  
+  try {
+    await eventsStore.deleteEvent(event.id)
+    // The store handles notifications and list updates
+  } catch (error) {
+    console.error('Delete event error:', error)
+  }
 }
 
 onMounted(async () => {

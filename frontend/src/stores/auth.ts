@@ -6,6 +6,7 @@ export interface User {
   id: number
   name: string
   email: string
+  role: 'user' | 'admin'
   email_verified_at: string | null
   created_at: string
   updated_at: string
@@ -23,11 +24,13 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('token'))
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const authChecked = ref(false)
 
   // Getters
   const isAuthenticated = computed(() => !!token.value && !!user.value)
   const userName = computed(() => user.value?.name || '')
   const userEmail = computed(() => user.value?.email || '')
+  const isAdmin = computed(() => user.value?.role === 'admin')
 
   // Actions
   const setToken = (newToken: string) => {
@@ -39,6 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
   const clearToken = () => {
     token.value = null
     user.value = null
+    authChecked.value = true
     localStorage.removeItem('token')
     delete axios.defaults.headers.common['Authorization']
   }
@@ -52,7 +56,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   const checkAuth = async () => {
     const storedToken = localStorage.getItem('token')
-    if (!storedToken) return
+    
+    if (!storedToken) {
+      authChecked.value = true
+      return
+    }
 
     try {
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
@@ -67,6 +75,8 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (err) {
       console.error('Auth check failed:', err)
       clearToken()
+    } finally {
+      authChecked.value = true
     }
   }
 
@@ -84,6 +94,7 @@ export const useAuthStore = defineStore('auth', () => {
         const { user: userData, token: userToken } = response.data.data
         user.value = userData
         setToken(userToken)
+        authChecked.value = true
         return { success: true }
       } else {
         setError(response.data.message || 'Login failed')
@@ -114,6 +125,7 @@ export const useAuthStore = defineStore('auth', () => {
         const { user: userData, token: userToken } = response.data.data
         user.value = userData
         setToken(userToken)
+        authChecked.value = true
         return { success: true }
       } else {
         setError(response.data.message || 'Registration failed')
@@ -201,11 +213,13 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     loading,
     error,
+    authChecked,
     
     // Getters
     isAuthenticated,
     userName,
     userEmail,
+    isAdmin,
     
     // Actions
     login,

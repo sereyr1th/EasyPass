@@ -16,17 +16,20 @@ class TicketPurchase extends Model
         'user_id',
         'ticket_id',
         'amount_paid',
+        'quantity',
         'payment_method',
         'transaction_id',
         'payment_status',
-        'bakong_qr_data', // Renamed to payment_data but keeping for backward compatibility
-        'bakong_payment_reference', // Renamed to payment_reference but keeping for backward compatibility
+        'stripe_payment_intent_id',
+        'stripe_payment_method_id',
+        'stripe_client_secret',
+        'stripe_metadata',
         'payment_expires_at'
     ];
 
     protected $casts = [
         'amount_paid' => 'decimal:2',
-        'bakong_qr_data' => 'array',
+        'stripe_metadata' => 'array',
         'payment_expires_at' => 'datetime',
     ];
 

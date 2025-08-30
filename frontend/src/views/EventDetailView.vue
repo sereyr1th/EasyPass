@@ -128,17 +128,17 @@
                             <span>Instant</span>
                           </div>
                           <div class="d-flex align-items-center">
-                            <i class="bi bi-phone text-info me-1"></i>
-                            <span>Bakong</span>
+                            <i class="bi bi-credit-card text-info me-1"></i>
+                            <span>Stripe</span>
                           </div>
                         </div>
                         
                         <div class="trust-badges d-flex align-items-center justify-content-center">
                           <div class="trust-badge me-2">
-                            <i class="bi bi-bank2 text-primary"></i>
+                            <i class="bi bi-credit-card text-primary"></i>
                           </div>
                           <div class="trust-badge me-2">
-                            <i class="bi bi-qr-code text-success"></i>
+                            <i class="bi bi-shield-lock text-success"></i>
                           </div>
                           <div class="trust-badge">
                             <i class="bi bi-shield-fill-check text-info"></i>
@@ -188,11 +188,11 @@
         
         <!-- Payment Content -->
         <div class="payment-content">
-          <BakongPayment
+          <StripePayment
             v-if="event"
             :event="event"
-            @payment-success="handlePaymentSuccess"
-            @payment-cancelled="closePaymentModal"
+            @close="closePaymentModal"
+            @paymentSuccess="onPaymentSuccess"
           />
         </div>
       </div>
@@ -206,7 +206,7 @@ import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useEventsStore, type Event } from '@/stores/events'
 import { useTicketsStore } from '@/stores/tickets'
-import BakongPayment from '@/components/payment/BakongPayment.vue'
+import StripePayment from '@/components/payment/StripePayment.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -238,6 +238,11 @@ const handlePaymentSuccess = (ticket: any) => {
 
 const closePaymentModal = () => {
   showPaymentModal.value = false
+}
+
+const onPaymentSuccess = (data: any) => {
+  // The success UI is handled by the StripePayment component
+  // Modal will be closed when user clicks "View My Ticket" or "Continue"
 }
 
 onMounted(async () => {

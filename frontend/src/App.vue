@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { onMounted } from 'vue'
 import Navbar from '@/components/layout/Navbar.vue'
+import NotificationContainer from '@/components/NotificationContainer.vue'
 
 const authStore = useAuthStore()
-
-onMounted(() => {
-  // Check for existing token on app load
-  authStore.checkAuth()
-})
 </script>
 
 <template>
@@ -33,8 +28,22 @@ onMounted(() => {
     
     <Navbar />
     <main class="position-relative">
-      <RouterView />
+      <!-- Loading state while checking authentication -->
+      <div v-if="!authStore.authChecked" class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="text-center">
+          <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="text-muted">Checking authentication...</p>
+        </div>
+      </div>
+      
+      <!-- Main content -->
+      <RouterView v-else />
     </main>
+    
+    <!-- Global Notifications -->
+    <NotificationContainer />
   </div>
 </template>
 

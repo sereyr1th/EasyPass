@@ -77,6 +77,7 @@ class EventController extends Controller
             'registration_deadline' => 'required|date|after:now|before:event_date',
             'price' => 'required|numeric|min:0',
             'max_attendees' => 'required|integer|min:1',
+            'refundable' => 'nullable|boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
@@ -90,6 +91,11 @@ class EventController extends Controller
 
         $eventData = $request->except('image');
         $eventData['created_by'] = $request->user()->id;
+        
+        // Ensure refundable has a default value if not provided
+        if (!isset($eventData['refundable'])) {
+            $eventData['refundable'] = false;
+        }
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -159,6 +165,7 @@ class EventController extends Controller
             'price' => 'numeric|min:0',
             'max_attendees' => 'integer|min:1',
             'status' => 'in:active,cancelled,completed',
+            'refundable' => 'nullable|boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
@@ -207,8 +214,9 @@ class EventController extends Controller
             ], 404);
         }
 
-        // Check if user owns the event
-        if ($event->created_by !== request()->user()->id) {
+        // Check if user owns the event or is an admin
+        $user = request()->user();
+        if ($event->created_by !== $user->id && !$user->isAdmin()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Unauthorized to delete this event'

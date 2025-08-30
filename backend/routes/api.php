@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\TicketController;
+use App\Http\Controllers\API\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -59,9 +60,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}/download', [TicketController::class, 'download']);
     });
 
-    // Payment routes
+    // Payment routes (Stripe)
     Route::prefix('payments')->group(function () {
-        Route::post('/initiate', [PaymentController::class, 'initiatePayment']);
+        Route::post('/create-intent', [PaymentController::class, 'createPaymentIntent']);
         Route::post('/status', [PaymentController::class, 'checkPaymentStatus']);
         Route::post('/confirm', [PaymentController::class, 'confirmPayment']);
         Route::post('/cancel', [PaymentController::class, 'cancelPayment']);
@@ -96,6 +97,32 @@ Route::middleware('auth:sanctum')->group(function () {
             'message' => 'Your message has been sent successfully. We will get back to you soon.'
         ]);
     });
+
+    // Admin routes (requires admin role)
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/analytics', [AdminController::class, 'getAnalytics']);
+        
+        // User management
+        Route::prefix('users')->group(function () {
+            Route::get('/', [AdminController::class, 'getUsers']);
+            Route::post('/', [AdminController::class, 'createUser']);
+            Route::put('/{id}', [AdminController::class, 'updateUser']);
+            Route::delete('/{id}', [AdminController::class, 'deleteUser']);
+        });
+        
+        // Event management
+        Route::prefix('events')->group(function () {
+            Route::get('/', [AdminController::class, 'getEvents']);
+            Route::delete('/{id}', [AdminController::class, 'deleteEvent']);
+        });
+        
+        // Ticket management
+        Route::prefix('tickets')->group(function () {
+            Route::get('/', [AdminController::class, 'getTickets']);
+        });
+    });
 });
 
 // Health check route
@@ -109,7 +136,7 @@ Route::get('/health', function () {
 
 // Public webhook routes (outside auth middleware)
 Route::prefix('payments/webhook')->group(function () {
-    Route::post('/khqr', [PaymentController::class, 'handleKHQRWebhook']);
+    Route::post('/stripe', [PaymentController::class, 'handleWebhook']);
 });
 
 // Test payment endpoint (public - for debugging only)

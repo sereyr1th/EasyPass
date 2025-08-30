@@ -64,6 +64,15 @@
               <i class="bi bi-speedometer2 me-2"></i>Dashboard
             </RouterLink>
           </li>
+          <li class="nav-item" v-if="authStore.isAuthenticated && authStore.isAdmin">
+            <RouterLink
+              to="/admin"
+              class="nav-link"
+              :class="{ 'active': $route.path.startsWith('/admin') }"
+            >
+              <i class="bi bi-shield-check me-2"></i>Admin
+            </RouterLink>
+          </li>
         </ul>
 
         <!-- User Menu -->
@@ -109,6 +118,21 @@
                 <li>
                   <RouterLink to="/contact" class="dropdown-item">
                     <i class="bi bi-envelope me-2 text-success"></i>Contact Support
+                  </RouterLink>
+                </li>
+                <li v-if="authStore.isAdmin">
+                  <RouterLink to="/admin" class="dropdown-item">
+                    <i class="bi bi-shield-check me-2 text-danger"></i>Admin Panel
+                  </RouterLink>
+                </li>
+                <li v-if="authStore.isAdmin">
+                  <RouterLink to="/admin/tickets" class="dropdown-item">
+                    <i class="bi bi-ticket me-2 text-warning"></i>All Tickets
+                  </RouterLink>
+                </li>
+                <li v-if="authStore.isAdmin">
+                  <RouterLink to="/admin/analytics" class="dropdown-item">
+                    <i class="bi bi-graph-up me-2 text-info"></i>Analytics
                   </RouterLink>
                 </li>
                 <li><hr class="dropdown-divider"></li>

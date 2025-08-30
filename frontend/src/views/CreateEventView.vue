@@ -234,6 +234,30 @@
                   </div>
                 </div>
 
+                <!-- Refund Policy -->
+                <div class="col-md-6">
+                  <label class="form-label text-light fw-semibold">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Refund Policy
+                  </label>
+                  <div class="form-check form-switch form-check-lg">
+                    <input
+                      id="refundable"
+                      v-model="form.refundable"
+                      type="checkbox"
+                      class="form-check-input"
+                      :disabled="loading"
+                    />
+                    <label for="refundable" class="form-check-label text-light">
+                      Allow ticket refunds
+                    </label>
+                  </div>
+                  <div class="form-text text-light opacity-75 mt-2">
+                    <i class="bi bi-info-circle me-1"></i>
+                    When enabled, users can cancel tickets and receive refunds
+                  </div>
+                </div>
+
                 <!-- Image Upload -->
                 <div class="col-12">
                   <label for="image" class="form-label text-light fw-semibold">
@@ -315,6 +339,7 @@ const form = reactive({
   registration_deadline: '',
   price: 0,
   max_attendees: 100,
+  refundable: false,
   image: null as File | null
 })
 
@@ -362,7 +387,12 @@ const handleSubmit = async () => {
       if (key === 'image' && value) {
         formData.append('image', value as File)
       } else if (key !== 'image' && value !== null) {
-        formData.append(key, String(value))
+        // Handle boolean values properly for Laravel validation
+        if (typeof value === 'boolean') {
+          formData.append(key, value ? '1' : '0')
+        } else {
+          formData.append(key, String(value))
+        }
       }
     })
 

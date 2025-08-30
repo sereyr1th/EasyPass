@@ -14,11 +14,16 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+import { useAuthStore } from './stores/auth'
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
+
+// Initialize authentication check on app start
+const authStore = useAuthStore()
+authStore.checkAuth()
 
 app.mount('#app')
 

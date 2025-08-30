@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { useNotifications } from '@/composables/useNotifications'
 
 export interface Event {
   id: number
@@ -16,6 +17,7 @@ export interface Event {
   image_url: string | null
   status: 'active' | 'cancelled' | 'completed'
   created_by: number
+  refundable: boolean
   created_at: string
   updated_at: string
   creator?: {
@@ -39,6 +41,9 @@ export interface EventFilters {
 }
 
 export const useEventsStore = defineStore('events', () => {
+  // Notifications
+  const { success: showSuccess, error: showError } = useNotifications()
+  
   // State
   const events = ref<Event[]>([])
   const currentEvent = ref<Event | null>(null)
@@ -215,19 +220,26 @@ export const useEventsStore = defineStore('events', () => {
         // Remove from events list
         events.value = events.value.filter(event => event.id !== id)
         
+        // Remove from myEvents list
+        myEvents.value = myEvents.value.filter(event => event.id !== id)
+        
         // Clear current event if it's the deleted one
         if (currentEvent.value?.id === id) {
           currentEvent.value = null
         }
         
+        showSuccess('Event Deleted', 'Event has been deleted successfully')
         return { success: true }
       } else {
-        setError(response.data.message || 'Failed to delete event')
-        return { success: false, message: response.data.message }
+        const errorMsg = response.data.message || 'Failed to delete event'
+        setError(errorMsg)
+        showError('Delete Failed', errorMsg)
+        return { success: false, message: errorMsg }
       }
     } catch (err: any) {
       const message = err.response?.data?.message || 'Failed to delete event'
       setError(message)
+      showError('Delete Failed', message)
       return { success: false, message }
     } finally {
       loading.value = false

@@ -1,18 +1,12 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
-interface PaymentData {
+interface StripePaymentData {
   transaction_id: string
+  payment_intent_id: string
+  client_secret: string
   amount: number
-  currency: string
-  merchant_name: string
-  merchant_city: string
-  bakong_account: string
-  phone_number: string
-  bill_number: string
-  store_label: string
-  terminal_label: string
-  expiration_time: number
+  status: string
 }
 
 interface Payment {
@@ -22,37 +16,45 @@ interface Payment {
   payment_method: string
   payment_status: string
   created_at: string
+  stripe_payment_intent_id?: string
+  stripe_payment_method_id?: string
   event: any
   ticket?: any
 }
 
 export const usePaymentsStore = defineStore('payments', {
   state: () => ({
-    currentPayment: null as PaymentData | null,
+    currentPayment: null as StripePaymentData | null,
     paymentHistory: [] as Payment[],
     loading: false,
     error: null as string | null
   }),
 
   actions: {
-    async initiatePayment(eventId: number, paymentForm: any) {
+    async createPaymentIntent(eventId: number, amount: number) {
       this.loading = true
       this.error = null
 
       try {
-        const response = await axios.post('/api/payments/initiate', {
+        const response = await axios.post('/api/payments/create-intent', {
           event_id: eventId,
-          ...paymentForm
+          amount: amount
         })
 
         if (response.data.status === 'success') {
-          this.currentPayment = response.data.data.payment_data
+          this.currentPayment = {
+            transaction_id: response.data.data.transaction_id,
+            payment_intent_id: response.data.data.payment_intent_id,
+            client_secret: response.data.data.client_secret,
+            amount: response.data.data.amount,
+            status: response.data.data.status
+          }
           return response.data
         } else {
-          throw new Error(response.data.message || 'Payment initiation failed')
+          throw new Error(response.data.message || 'Payment intent creation failed')
         }
       } catch (error: any) {
-        this.error = error.response?.data?.message || error.message || 'Payment initiation failed'
+        this.error = error.response?.data?.message || error.message || 'Payment intent creation failed'
         throw error
       } finally {
         this.loading = false
@@ -71,14 +73,13 @@ export const usePaymentsStore = defineStore('payments', {
       }
     },
 
-    async confirmPayment(transactionId: string, paymentReference?: string) {
+    async confirmPayment(transactionId: string) {
       this.loading = true
       this.error = null
 
       try {
         const response = await axios.post('/api/payments/confirm', {
-          transaction_id: transactionId,
-          payment_reference: paymentReference
+          transaction_id: transactionId
         })
 
         if (response.data.status === 'success') {

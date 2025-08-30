@@ -111,6 +111,37 @@ const router = createRouter({
       component: () => import('../views/ContactView.vue'),
       meta: { title: 'Contact - EasyPass' }
     },
+    // Admin routes
+    {
+      path: '/admin',
+      name: 'admin-dashboard',
+      component: () => import('../views/AdminDashboardView.vue'),
+      meta: { title: 'Admin Dashboard - EasyPass', requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/admin/users',
+      name: 'admin-users',
+      component: () => import('../views/AdminUsersView.vue'),
+      meta: { title: 'User Management - EasyPass', requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/admin/events',
+      name: 'admin-events',
+      component: () => import('../views/AdminEventsView.vue'),
+      meta: { title: 'Event Management - EasyPass', requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/admin/tickets',
+      name: 'admin-tickets',
+      component: () => import('../views/AdminTicketsView.vue'),
+      meta: { title: 'Ticket Management - EasyPass', requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/admin/analytics',
+      name: 'admin-analytics',
+      component: () => import('../views/AdminAnalyticsView.vue'),
+      meta: { title: 'Analytics Dashboard - EasyPass', requiresAuth: true, requiresAdmin: true }
+    },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
@@ -136,10 +167,27 @@ router.beforeEach(async (to, from, next) => {
     document.title = to.meta.title as string
   }
   
+  // Wait for auth check to complete if not done yet
+  if (!authStore.authChecked) {
+    await authStore.checkAuth()
+  }
+  
   // Check if route requires authentication
   if (to.meta.requiresAuth) {
     if (!authStore.isAuthenticated) {
       next({ name: 'login', query: { redirect: to.fullPath } })
+      return
+    }
+  }
+
+  // Check if route requires admin access
+  if (to.meta.requiresAdmin) {
+    if (!authStore.isAuthenticated) {
+      next({ name: 'login', query: { redirect: to.fullPath } })
+      return
+    }
+    if (!authStore.isAdmin) {
+      next({ name: 'home' })
       return
     }
   }
