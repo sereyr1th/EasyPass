@@ -1,6 +1,0 @@
-# This file forces Railway to NOT use Docker
-# Since we deleted Dockerfile, this ensures Nixpacks is used
-*
-!composer.json
-!nixpacks.toml
-!railway.toml
