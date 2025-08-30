@@ -21,13 +21,27 @@ return [
 
     'allowed_origins' => array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174'))),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        // Matches: https://easy-pass-ems.vercel.app, https://easy-pass-ems-git-main-riths-projects-a27c1136.vercel.app
+        '/^https:\/\/easy-pass-ems.*\.vercel\.app$/',
+        // Matches: https://easy-pass-f6ad316mh-riths-projects-a27c1136.vercel.app, https://easy-pass-ems-git-main-riths-projects-a27c1136.vercel.app
+        '/^https:\/\/.*-riths-projects-a27c1136\.vercel\.app$/',
+    ],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => [
+        'Accept',
+        'Authorization',
+        'Content-Type',
+        'X-Requested-With',
+        'X-CSRF-TOKEN',
+        'X-XSRF-TOKEN',
+    ],
 
-    'exposed_headers' => [],
+    'exposed_headers' => [
+        'X-CSRF-TOKEN',
+    ],
 
-    'max_age' => 0,
+    'max_age' => 86400, // 24 hours
 
     'supports_credentials' => true,
 
