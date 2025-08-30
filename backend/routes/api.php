@@ -131,6 +131,10 @@ Route::get('/health', function () {
         'status' => 'success',
         'message' => 'EasyPass API is running',
         'timestamp' => now(),
+        'cors_config' => [
+            'allowed_origins' => config('cors.allowed_origins'),
+            'sanctum_domains' => config('sanctum.stateful')
+        ]
     ]);
 });
 
