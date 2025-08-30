@@ -5,22 +5,29 @@ echo "Environment: $APP_ENV"
 echo "Port: $PORT"
 echo "Database URL: $DATABASE_URL"
 
-# Ensure we're in the right directory
-cd /app || exit 1
+# Ensure we're in the right directory (Railway uses /app for Nixpacks)
+cd /app 2>/dev/null || cd . || exit 1
+echo "Working directory: $(pwd)"
+echo "Files present: $(ls -la)"
 
 # Check if .env exists, if not create it
-if [ ! -f .env ]; then
-    echo "📝 Creating .env file..."
-    echo "APP_NAME=EasyPass-EMS" > .env
-    echo "APP_ENV=production" >> .env
-    echo "APP_DEBUG=false" >> .env
-    echo "APP_KEY=" >> .env
-    echo "DB_CONNECTION=pgsql" >> .env
+if [ ! -f backend/.env ]; then
+    echo "📝 Creating backend/.env file..."
+    echo "APP_NAME=EasyPass-EMS" > backend/.env
+    echo "APP_ENV=production" >> backend/.env
+    echo "APP_DEBUG=false" >> backend/.env
+    echo "APP_KEY=" >> backend/.env
+    echo "DB_CONNECTION=pgsql" >> backend/.env
     
     # Add DATABASE_URL if it exists
     if [ ! -z "$DATABASE_URL" ]; then
-        echo "DATABASE_URL=$DATABASE_URL" >> .env
+        echo "DATABASE_URL=$DATABASE_URL" >> backend/.env
     fi
+fi
+
+# Also create .env in root for artisan command
+if [ ! -f .env ]; then
+    cp backend/.env .env 2>/dev/null || echo "Could not copy .env to root"
 fi
 
 # Generate app key if it doesn't exist
