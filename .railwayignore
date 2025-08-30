@@ -1,0 +1,14 @@
+# Railway ignore file
+node_modules/
+frontend/node_modules/
+backend/vendor/
+backend/storage/logs/
+backend/storage/framework/cache/
+backend/storage/framework/sessions/
+backend/storage/framework/views/
+.git/
+*.log
+.env.local
+.env.*.local
+dist/
+build/
