@@ -98,8 +98,27 @@
               </div>
             </div>
 
-            <!-- Submit Button -->
+            <!-- Submit Buttons -->
             <div class="d-grid gap-2 mb-4">
+              <!-- Check Validity Button (doesn't mark as used) -->
+              <button
+                type="button"
+                @click="checkTicketValidity"
+                :disabled="ticketsStore.loading || !ticketNumber.trim()"
+                class="btn btn-info btn-lg d-flex align-items-center justify-content-center position-relative overflow-hidden"
+                style="min-height: 60px;"
+              >
+                <div class="position-absolute w-100 h-100 top-0 start-0 bg-gradient" 
+                     style="background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%); 
+                            animation: shimmer 2s infinite;"></div>
+                <div v-if="ticketsStore.loading" class="spinner-border spinner-border-sm me-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <i v-else class="bi bi-search me-2 fs-5"></i>
+                {{ ticketsStore.loading ? 'Checking...' : 'Check Ticket Validity' }}
+              </button>
+              
+              <!-- Validate & Mark as Used Button -->
               <button
                 type="submit"
                 :disabled="ticketsStore.loading || !ticketNumber.trim()"
@@ -113,7 +132,7 @@
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <i v-else class="bi bi-check-circle me-2 fs-5"></i>
-                {{ ticketsStore.loading ? 'Validating...' : 'Validate Ticket' }}
+                {{ ticketsStore.loading ? 'Processing Entry...' : 'Validate & Allow Entry' }}
               </button>
             </div>
 
@@ -144,7 +163,9 @@
               </div>
               <div>
                 <h3 class="text-light fw-bold mb-1">Ticket Valid!</h3>
-                <p class="text-success mb-0">Entry approved</p>
+                <p class="text-success mb-0">
+                  {{ ticketsStore.validationResult?.was_marked_used ? 'Entry approved - Ticket marked as used' : 'Ticket is valid and ready for entry' }}
+                </p>
               </div>
             </div>
           </div>
@@ -191,6 +212,21 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Mark as Used Button (if ticket was only validated, not used) -->
+            <div v-if="!ticketsStore.validationResult?.was_marked_used" class="mt-4 pt-4 border-top border-success">
+              <button
+                @click="markTicketAsUsed"
+                :disabled="ticketsStore.loading"
+                class="btn btn-warning btn-lg w-100 d-flex align-items-center justify-content-center"
+              >
+                <div v-if="ticketsStore.loading" class="spinner-border spinner-border-sm me-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <i v-else class="bi bi-door-open me-2 fs-5"></i>
+                {{ ticketsStore.loading ? 'Processing Entry...' : 'Allow Entry & Mark as Used' }}
+              </button>
             </div>
           </div>
         </div>
@@ -244,10 +280,22 @@ const validationSuccess = computed(() => {
   return ticketsStore.validationResult && !ticketsStore.error
 })
 
+const checkTicketValidity = async () => {
+  if (!ticketNumber.value.trim()) return
+  
+  await ticketsStore.validateTicket(ticketNumber.value.trim(), false) // false = don't mark as used
+}
+
 const validateTicket = async () => {
   if (!ticketNumber.value.trim()) return
   
-  await ticketsStore.validateTicket(ticketNumber.value.trim())
+  await ticketsStore.validateTicket(ticketNumber.value.trim(), true) // true = mark as used
+}
+
+const markTicketAsUsed = async () => {
+  if (!ticketNumber.value.trim()) return
+  
+  await ticketsStore.validateTicket(ticketNumber.value.trim(), true) // true = mark as used
 }
 
 const openQRScanner = async () => {
@@ -320,9 +368,9 @@ const onQRDecode = async (result: string) => {
     ticketNumber.value = extractedTicketNumber
     closeQRScanner()
     
-    // Auto-validate if we got a valid-looking ticket number
+    // Auto-check validity if we got a valid-looking ticket number (don't mark as used yet)
     if (extractedTicketNumber.trim()) {
-      await validateTicket()
+      await checkTicketValidity()
     }
   }
 }

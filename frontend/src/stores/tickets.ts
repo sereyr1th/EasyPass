@@ -142,26 +142,29 @@ export const useTicketsStore = defineStore('tickets', () => {
     }
   }
 
-  const validateTicket = async (ticketNumber: string) => {
+  const validateTicket = async (ticketNumber: string, markAsUsed: boolean = false) => {
     loading.value = true
     error.value = null
     validationResult.value = null
 
     try {
       const response = await axios.post('/api/tickets/validate', {
-        ticket_number: ticketNumber
+        ticket_number: ticketNumber,
+        mark_as_used: markAsUsed
       })
       
       if (response.data.status === 'success') {
         validationResult.value = response.data.data
         
-        // Update ticket in the list if it exists
-        const ticketIndex = tickets.value.findIndex(
-          ticket => ticket.ticket_number === ticketNumber
-        )
-        if (ticketIndex !== -1) {
-          tickets.value[ticketIndex].status = 'used'
-          tickets.value[ticketIndex].used_at = response.data.data.validated_at
+        // Update ticket in the list if it exists and was marked as used
+        if (response.data.data.was_marked_used) {
+          const ticketIndex = tickets.value.findIndex(
+            ticket => ticket.ticket_number === ticketNumber
+          )
+          if (ticketIndex !== -1) {
+            tickets.value[ticketIndex].status = 'used'
+            tickets.value[ticketIndex].used_at = response.data.data.validated_at
+          }
         }
         
         return { 

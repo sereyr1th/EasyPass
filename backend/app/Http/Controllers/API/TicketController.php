@@ -152,7 +152,8 @@ class TicketController extends Controller
     public function validate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'ticket_number' => 'required|string|exists:tickets,ticket_number'
+            'ticket_number' => 'required|string|exists:tickets,ticket_number',
+            'mark_as_used' => 'boolean' // Optional parameter to control if ticket should be marked as used
         ]);
 
         if ($validator->fails()) {
@@ -201,11 +202,14 @@ class TicketController extends Controller
             ], 400);
         }
 
-        // Mark ticket as used
-        $ticket->update([
-            'status' => 'used',
-            'used_at' => now()
-        ]);
+        // Only mark ticket as used if explicitly requested (for actual entry)
+        $validatedAt = now();
+        if ($request->boolean('mark_as_used', true)) { // Default to true for backward compatibility
+            $ticket->update([
+                'status' => 'used',
+                'used_at' => $validatedAt
+            ]);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -214,7 +218,8 @@ class TicketController extends Controller
                 'ticket' => $ticket,
                 'event' => $ticket->event,
                 'user' => $ticket->user,
-                'validated_at' => now()
+                'validated_at' => $validatedAt,
+                'was_marked_used' => $request->boolean('mark_as_used', true)
             ]
         ]);
     }
