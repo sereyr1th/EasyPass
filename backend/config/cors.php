@@ -41,7 +41,7 @@ return [
         'X-CSRF-TOKEN',
     ],
 
-    'max_age' => 86400, // 24 hours
+    'max_age' => 86400, // 24 hours - updated for Railway deployment
 
     'supports_credentials' => true,
 
