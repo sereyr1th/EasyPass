@@ -34,7 +34,7 @@
             <div v-if="ticket.status === 'valid'" class="text-center mb-6">
               <div class="bg-white p-6 rounded-lg inline-block">
                 <img
-                  :src="`data:image/png;base64,${ticket.qr_code}`"
+                  :src="ticket.qr_code"
                   :alt="`QR Code for ${ticket.ticket_number}`"
                   class="w-48 h-48"
                 />

@@ -23,6 +23,7 @@ export interface Ticket {
     event_date: string
     price: number
     image_url: string | null
+    refundable: boolean
   }
   user?: {
     id: number

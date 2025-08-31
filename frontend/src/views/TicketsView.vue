@@ -63,7 +63,7 @@
               <!-- QR Code -->
               <div v-if="ticket.status === 'valid'" class="bg-light p-3 rounded text-center mb-4">
                 <img
-                  :src="`data:image/png;base64,${ticket.qr_code}`"
+                  :src="ticket.qr_code"
                   :alt="`QR Code for ${ticket.ticket_number}`"
                   class="mx-auto"
                   style="width: 96px; height: 96px;"
