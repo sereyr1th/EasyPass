@@ -19,20 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => env('APP_ENV') === 'production' ? ['*'] : [
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://127.0.0.1:5173',
-        'http://127.0.0.1:5174',
-    ],
+    'allowed_origins' => array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174'))),
 
     'allowed_origins_patterns' => [
-        // Matches all Vercel preview deployments for your project
-        '/^https:\/\/easy-pass-.*\.vercel\.app$/',
-        // Matches all deployments with your specific Vercel user ID
-        '/^https:\/\/.*-riths-projects-a27c1136\.vercel\.app$/',
-        // Additional pattern to catch any variations
-        '/^https:\/\/.*\.vercel\.app$/',
+        // Matches Render domains
+        '/^https:\/\/.*\.onrender\.com$/',
     ],
 
     'allowed_headers' => [
