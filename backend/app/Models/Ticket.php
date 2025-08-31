@@ -69,7 +69,69 @@ class Ticket extends Model
             'status' => $this->status
         ]);
         
-        // Try SVG writer first (doesn't require GD)
+        // Try PNG writer with retry logic (most compatible with browsers)
+        $maxRetries = 3;
+        $retryDelay = 100000; // 100ms in microseconds
+        
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $qrCode = new QrCode($qrData);
+                $writer = new PngWriter();
+                
+                $result = $writer->write($qrCode);
+                $pngData = $result->getString();
+                
+                // Return proper data URI for PNG with validation
+                $base64Data = base64_encode($pngData);
+                
+                // Validate base64 data
+                if (empty($base64Data) || !preg_match('/^[A-Za-z0-9+\/]*={0,2}$/', $base64Data)) {
+                    throw new \Exception('Invalid base64 data generated');
+                }
+                
+                return 'data:image/png;base64,' . $base64Data;
+                
+            } catch (\Exception $e) {
+                \Log::error("PNG QR Code generation attempt {$attempt} failed", [
+                    'ticket_id' => $this->id,
+                    'error' => $e->getMessage(),
+                    'memory_usage' => memory_get_usage(true),
+                    'memory_peak' => memory_get_peak_usage(true),
+                    'gd_info' => function_exists('gd_info') ? gd_info() : 'GD not available'
+                ]);
+                
+                if ($attempt === $maxRetries) {
+                    // Last attempt failed, try SVG fallback
+                    \Log::warning("PNG generation failed, trying SVG fallback", [
+                        'ticket_id' => $this->id,
+                        'png_error' => $e->getMessage()
+                    ]);
+                    
+                    return $this->generateSvgQrFallback($qrData);
+                }
+                
+                // Wait before retrying
+                usleep($retryDelay);
+                
+                // Increase delay for next attempt
+                $retryDelay *= 2;
+                
+                // Force garbage collection to free memory
+                if (function_exists('gc_collect_cycles')) {
+                    gc_collect_cycles();
+                }
+            }
+        }
+        
+        // This should never be reached, but just in case
+        return $this->generateSvgQrFallback($qrData);
+    }
+    
+    /**
+     * Generate SVG QR code as fallback
+     */
+    private function generateSvgQrFallback(string $qrData): string
+    {
         try {
             $qrCode = new QrCode($qrData);
             $writer = new \Endroid\QrCode\Writer\SvgWriter();
@@ -77,62 +139,24 @@ class Ticket extends Model
             $result = $writer->write($qrCode);
             $svgContent = $result->getString();
             
-            // Convert SVG to base64 data URI for compatibility
-            return 'data:image/svg+xml;base64,' . base64_encode($svgContent);
+            // Return SVG as data URI with validation
+            $base64Svg = base64_encode($svgContent);
             
-        } catch (\Exception $svgException) {
-            \Log::warning("SVG QR Code generation failed, trying PNG with retries", [
+            // Validate base64 data
+            if (empty($base64Svg) || !preg_match('/^[A-Za-z0-9+\/]*={0,2}$/', $base64Svg)) {
+                throw new \Exception('Invalid SVG base64 data generated');
+            }
+            
+            return 'data:image/svg+xml;base64,' . $base64Svg;
+            
+        } catch (\Exception $e) {
+            \Log::error("SVG QR Code generation also failed, using text fallback", [
                 'ticket_id' => $this->id,
-                'svg_error' => $svgException->getMessage()
+                'svg_error' => $e->getMessage()
             ]);
             
-            // Fallback to PNG with retry logic
-            $maxRetries = 3;
-            $retryDelay = 100000; // 100ms in microseconds
-            
-            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-                try {
-                    $qrCode = new QrCode($qrData);
-                    $writer = new PngWriter();
-                    
-                    $result = $writer->write($qrCode);
-                    return base64_encode($result->getString());
-                    
-                } catch (\Exception $e) {
-                    \Log::error("PNG QR Code generation attempt {$attempt} failed", [
-                        'ticket_id' => $this->id,
-                        'error' => $e->getMessage(),
-                        'memory_usage' => memory_get_usage(true),
-                        'memory_peak' => memory_get_peak_usage(true),
-                        'gd_info' => function_exists('gd_info') ? gd_info() : 'GD not available'
-                    ]);
-                    
-                    if ($attempt === $maxRetries) {
-                        // Last attempt failed, use text-based fallback
-                        \Log::error("All QR generation attempts failed, using text fallback", [
-                            'ticket_id' => $this->id,
-                            'final_error' => $e->getMessage()
-                        ]);
-                        
-                        return $this->generateTextBasedQrFallback();
-                    }
-                    
-                    // Wait before retrying
-                    usleep($retryDelay);
-                    
-                    // Increase delay for next attempt
-                    $retryDelay *= 2;
-                    
-                    // Force garbage collection to free memory
-                    if (function_exists('gc_collect_cycles')) {
-                        gc_collect_cycles();
-                    }
-                }
-            }
+            return $this->generateTextBasedQrFallback();
         }
-        
-        // This should never be reached, but just in case
-        return $this->generateTextBasedQrFallback();
     }
     
     /**
