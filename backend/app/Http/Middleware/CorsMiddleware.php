@@ -17,16 +17,23 @@ class CorsMiddleware
     {
         $origin = $request->headers->get('Origin');
         
-        // Define allowed origins
-        $allowedOrigins = [
+        // Get allowed origins from environment variable, with fallback to localhost for development
+        $corsOrigins = env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:5174');
+        $allowedOrigins = array_filter(explode(',', $corsOrigins));
+        
+        // Add localhost origins for development
+        $allowedOrigins = array_merge($allowedOrigins, [
             'http://localhost:5173',
             'http://localhost:5174',
             'http://127.0.0.1:5173',
             'http://127.0.0.1:5174',
-        ];
+        ]);
         
-        // Determine the origin to allow
-        $allowOrigin = in_array($origin, $allowedOrigins) ? $origin : 'http://localhost:5174';
+        // Remove duplicates
+        $allowedOrigins = array_unique($allowedOrigins);
+        
+        // Determine the origin to allow - use the requesting origin if allowed, otherwise use first allowed origin
+        $allowOrigin = in_array($origin, $allowedOrigins) ? $origin : $allowedOrigins[0];
 
         // Handle preflight OPTIONS request
         if ($request->getMethod() === "OPTIONS") {
