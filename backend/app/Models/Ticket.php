@@ -69,10 +69,46 @@ class Ticket extends Model
             'status' => $this->status
         ]);
         
-        $qrCode = new QrCode($qrData);
-        $writer = new PngWriter();
+        $maxRetries = 3;
+        $retryDelay = 100000; // 100ms in microseconds
         
-        return base64_encode($writer->write($qrCode)->getString());
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $qrCode = new QrCode($qrData);
+                $writer = new PngWriter();
+                
+                $result = $writer->write($qrCode);
+                return base64_encode($result->getString());
+                
+            } catch (\Exception $e) {
+                \Log::error("QR Code generation attempt {$attempt} failed", [
+                    'ticket_id' => $this->id,
+                    'error' => $e->getMessage(),
+                    'memory_usage' => memory_get_usage(true),
+                    'memory_peak' => memory_get_peak_usage(true),
+                    'gd_info' => function_exists('gd_info') ? gd_info() : 'GD not available'
+                ]);
+                
+                if ($attempt === $maxRetries) {
+                    // Last attempt failed, throw the exception
+                    throw new \Exception("Failed to generate QR code after {$maxRetries} attempts: " . $e->getMessage());
+                }
+                
+                // Wait before retrying
+                usleep($retryDelay);
+                
+                // Increase delay for next attempt
+                $retryDelay *= 2;
+                
+                // Force garbage collection to free memory
+                if (function_exists('gc_collect_cycles')) {
+                    gc_collect_cycles();
+                }
+            }
+        }
+        
+        // This should never be reached, but just in case
+        throw new \Exception('QR code generation failed unexpectedly');
     }
 
     /**
