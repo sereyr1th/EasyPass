@@ -538,4 +538,68 @@ class PaymentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Public payment confirmation for debugging (REMOVE IN PRODUCTION)
+     */
+    public function confirmPaymentPublic(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'transaction_id' => 'required|string|exists:ticket_purchases,transaction_id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $purchase = TicketPurchase::where('transaction_id', $request->transaction_id)->first();
+
+        if (!$purchase) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Transaction not found'
+            ], 404);
+        }
+
+        if ($purchase->payment_status !== 'pending') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Payment has already been processed'
+            ], 400);
+        }
+
+        try {
+            // For public confirmation, we'll simulate a successful payment
+            $this->completePayment($purchase, ['payment_method' => 'public_confirmation']);
+
+            $freshPurchase = $purchase->fresh();
+            $ticket = $freshPurchase->ticket;
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payment confirmed publicly (DEBUG MODE)',
+                'data' => [
+                    'ticket' => $ticket ? $ticket->load('event') : null,
+                    'purchase' => $freshPurchase
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Public payment confirmation failed', [
+                'transaction_id' => $request->transaction_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to confirm payment: ' . $e->getMessage(),
+                'debug' => config('app.debug') ? $e->getTraceAsString() : null
+            ], 500);
+        }
+    }
 }

@@ -143,6 +143,9 @@ Route::prefix('payments/webhook')->group(function () {
     Route::post('/stripe', [PaymentController::class, 'handleWebhook']);
 });
 
+// Temporary public payment confirmation for debugging (REMOVE IN PRODUCTION)
+Route::post('/payments/confirm-public', [PaymentController::class, 'confirmPaymentPublic']);
+
 // Test payment endpoint (public - for debugging only)
 Route::post('/test-payment', function (Request $request) {
     \Log::info('Test payment request received', $request->all());
