@@ -19,7 +19,20 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174'))),
+    'allowed_origins' => array_merge(
+        array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', ''))),
+        [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:5174',
+            'https://easy-pass-ems.vercel.app',
+            'https://easy-pass-377a3ws1u-riths-projects-a27c1136.vercel.app',
+            'https://easy-pass-gy767rxfh-riths-projects-a27c1136.vercel.app',
+            'https://easy-pass-fn0rfblzt-riths-projects-a27c1136.vercel.app'
+            // easy-pass-fn0rfblzt-riths-projects-a27c1136.vercel.app,
+        ]
+    ),
 
     'allowed_origins_patterns' => [
         // Matches all Vercel preview deployments for your project
