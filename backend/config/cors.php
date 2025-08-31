@@ -22,10 +22,12 @@ return [
     'allowed_origins' => array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174'))),
 
     'allowed_origins_patterns' => [
-        // Matches: https://easy-pass-ems.vercel.app, https://easy-pass-ems-git-main-riths-projects-a27c1136.vercel.app
-        '/^https:\/\/easy-pass-ems.*\.vercel\.app$/',
-        // Matches: https://easy-pass-f6ad316mh-riths-projects-a27c1136.vercel.app, https://easy-pass-ems-git-main-riths-projects-a27c1136.vercel.app
+        // Matches all Vercel preview deployments for your project
+        '/^https:\/\/easy-pass-.*\.vercel\.app$/',
+        // Matches all deployments with your specific Vercel user ID
         '/^https:\/\/.*-riths-projects-a27c1136\.vercel\.app$/',
+        // Additional pattern to catch any variations
+        '/^https:\/\/.*\.vercel\.app$/',
     ],
 
     'allowed_headers' => [
