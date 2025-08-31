@@ -30,6 +30,44 @@
         </p>
       </div>
 
+      <!-- QR Scanner Modal -->
+      <div v-if="showScanner" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+           style="z-index: 1050; background: rgba(0, 0, 0, 0.9);">
+        <div class="card border-0 shadow-lg" style="max-width: 500px; width: 90%;">
+          <div class="card-header bg-dark text-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-camera me-2"></i>
+              QR Code Scanner
+            </h5>
+            <button @click="closeQRScanner" class="btn-close btn-close-white"></button>
+          </div>
+          <div class="card-body bg-dark text-center">
+            <div v-if="cameraError" class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              {{ cameraError }}
+            </div>
+            <div v-else>
+              <video
+                ref="videoRef"
+                style="width: 100%; max-width: 400px; border-radius: 8px;"
+                autoplay
+                muted
+                playsinline
+              ></video>
+              <p class="text-muted mt-3 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Point your camera at the QR code
+              </p>
+            </div>
+          </div>
+          <div class="card-footer bg-dark border-top-0">
+            <button @click="closeQRScanner" class="btn btn-secondary w-100">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Validation Form -->
       <div class="card border-0 shadow-lg mb-5" style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.05);">
         <div class="card-body p-5">
@@ -191,11 +229,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useTicketsStore } from '@/stores/tickets'
+import QrScanner from 'qr-scanner'
 
 const ticketsStore = useTicketsStore()
 const ticketNumber = ref('')
+const showScanner = ref(false)
+const cameraError = ref('')
+const videoRef = ref<HTMLVideoElement | null>(null)
+let qrScanner: QrScanner | null = null
 
 const validationSuccess = computed(() => {
   return ticketsStore.validationResult && !ticketsStore.error
@@ -207,11 +250,90 @@ const validateTicket = async () => {
   await ticketsStore.validateTicket(ticketNumber.value.trim())
 }
 
-const openQRScanner = () => {
-  // In a real implementation, this would open a QR code scanner
-  // For now, we'll show an alert
-  alert('QR Code scanner would be implemented here using a library like vue-qr-reader')
+const openQRScanner = async () => {
+  showScanner.value = true
+  cameraError.value = ''
+  
+  // Wait for the next tick to ensure the video element is rendered
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
+  if (videoRef.value) {
+    try {
+      qrScanner = new QrScanner(
+        videoRef.value,
+        (result) => onQRDecode(result.data),
+        {
+          onDecodeError: (error) => {
+            // Silently ignore decode errors as they happen continuously while scanning
+            console.debug('QR decode error:', error)
+          },
+          preferredCamera: 'environment',
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+        }
+      )
+      
+      await qrScanner.start()
+    } catch (error: any) {
+      console.error('QR Scanner initialization failed:', error)
+      cameraError.value = 'Camera access failed. Please ensure camera permissions are granted and try again.'
+    }
+  }
 }
+
+const closeQRScanner = () => {
+  if (qrScanner) {
+    qrScanner.stop()
+    qrScanner.destroy()
+    qrScanner = null
+  }
+  showScanner.value = false
+  cameraError.value = ''
+}
+
+const onQRDecode = async (result: string) => {
+  if (result) {
+    let extractedTicketNumber = result
+    
+    try {
+      // Try to parse as JSON first (our QR codes contain JSON data)
+      const qrData = JSON.parse(result)
+      if (qrData.ticket_number) {
+        extractedTicketNumber = qrData.ticket_number
+      }
+    } catch (e) {
+      // If not JSON, try other parsing methods
+      
+      // If it's a URL, try to extract ticket number from it
+      if (result.includes('http')) {
+        const urlParams = new URLSearchParams(result.split('?')[1] || '')
+        extractedTicketNumber = urlParams.get('ticket') || urlParams.get('id') || result
+      }
+      
+      // If it looks like a ticket number pattern, use it directly
+      const ticketMatch = result.match(/EP-[A-Z0-9]+/i)
+      if (ticketMatch) {
+        extractedTicketNumber = ticketMatch[0]
+      }
+    }
+    
+    ticketNumber.value = extractedTicketNumber
+    closeQRScanner()
+    
+    // Auto-validate if we got a valid-looking ticket number
+    if (extractedTicketNumber.trim()) {
+      await validateTicket()
+    }
+  }
+}
+
+// Cleanup on component unmount
+onUnmounted(() => {
+  if (qrScanner) {
+    qrScanner.stop()
+    qrScanner.destroy()
+  }
+})
 
 const clearValidation = () => {
   ticketsStore.clearValidationResult()
