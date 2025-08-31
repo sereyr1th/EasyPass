@@ -372,15 +372,23 @@ class PaymentController extends Controller
 
             \Log::info('Payment completed successfully', [
                 'transaction_id' => $purchase->transaction_id,
-                'ticket_id' => $ticket->id
+                'ticket_id' => $firstTicket ? $firstTicket->id : null,
+                'tickets_created' => count($tickets)
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Failed to complete payment', [
                 'transaction_id' => $purchase->transaction_id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'purchase_id' => $purchase->id,
+                'event_id' => $purchase->event_id,
+                'user_id' => $purchase->user_id
             ]);
+            
+            // Re-throw the exception so the calling method can handle it
+            throw $e;
         }
     }
 
@@ -500,16 +508,34 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        // For admin manual confirmation, we'll simulate a successful payment
-        $this->completePayment($purchase, ['payment_method' => 'manual_admin_confirmation']);
+        try {
+            // For admin manual confirmation, we'll simulate a successful payment
+            $this->completePayment($purchase, ['payment_method' => 'manual_admin_confirmation']);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Payment confirmed manually',
-            'data' => [
-                'ticket' => $purchase->fresh()->ticket->load('event'),
-                'purchase' => $purchase->fresh()
-            ]
-        ]);
+            $freshPurchase = $purchase->fresh();
+            $ticket = $freshPurchase->ticket;
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payment confirmed manually',
+                'data' => [
+                    'ticket' => $ticket ? $ticket->load('event') : null,
+                    'purchase' => $freshPurchase
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Payment confirmation failed', [
+                'transaction_id' => $request->transaction_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to confirm payment: ' . $e->getMessage(),
+                'debug' => config('app.debug') ? $e->getTraceAsString() : null
+            ], 500);
+        }
     }
 }
