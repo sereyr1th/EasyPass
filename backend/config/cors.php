@@ -29,6 +29,8 @@ return [
         // Matches localhost for development
         '/^http:\/\/localhost:\d+$/',
         '/^http:\/\/127\.0\.0\.1:\d+$/',
+        // Additional Railway pattern for subdomains
+        '/^https:\/\/[a-zA-Z0-9\-]+\.railway\.app$/',
     ],
 
     'allowed_headers' => [
