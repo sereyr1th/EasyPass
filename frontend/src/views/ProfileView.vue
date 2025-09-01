@@ -173,16 +173,23 @@ const updateProfile = async () => {
   updateError.value = ''
   updateSuccess.value = false
   
-  // Simulate profile update (in real app, this would call an API)
-  setTimeout(() => {
-    updateSuccess.value = true
-    updating.value = false
+  try {
+    const result = await authStore.updateProfile(form.name, form.email)
     
-    // Clear success message after 3 seconds
-    setTimeout(() => {
-      updateSuccess.value = false
-    }, 3000)
-  }, 1000)
+    if (result.success) {
+      updateSuccess.value = true
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        updateSuccess.value = false
+      }, 3000)
+    } else {
+      updateError.value = result.message || 'Failed to update profile'
+    }
+  } catch (error: any) {
+    updateError.value = error.message || 'Failed to update profile'
+  } finally {
+    updating.value = false
+  }
 }
 
 onMounted(() => {

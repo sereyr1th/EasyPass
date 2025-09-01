@@ -7,6 +7,8 @@ use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/profile', [AuthController::class, 'profile']);
+        Route::put('/profile', [AuthController::class, 'updateProfile']);
     });
 
     // Event management routes
@@ -86,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
         }
 
         // Log the contact message (in real app, send email to developers)
-        \Log::info('Contact form submission', [
+        Log::info('Contact form submission', [
             'user_id' => $request->user()->id,
             'subject' => $request->subject,
             'message' => $request->message,
@@ -103,7 +106,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Dashboard
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
         Route::get('/analytics', [AdminController::class, 'getAnalytics']);
-        
+
         // User management
         Route::prefix('users')->group(function () {
             Route::get('/', [AdminController::class, 'getUsers']);
@@ -111,13 +114,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{id}', [AdminController::class, 'updateUser']);
             Route::delete('/{id}', [AdminController::class, 'deleteUser']);
         });
-        
+
         // Event management
         Route::prefix('events')->group(function () {
             Route::get('/', [AdminController::class, 'getEvents']);
             Route::delete('/{id}', [AdminController::class, 'deleteEvent']);
         });
-        
+
         // Ticket management
         Route::prefix('tickets')->group(function () {
             Route::get('/', [AdminController::class, 'getTickets']);
@@ -148,7 +151,7 @@ Route::post('/payments/confirm-public', [PaymentController::class, 'confirmPayme
 
 // Test payment endpoint (public - for debugging only)
 Route::post('/test-payment', function (Request $request) {
-    \Log::info('Test payment request received', $request->all());
+    Log::info('Test payment request received', $request->all());
     return response()->json([
         'status' => 'success',
         'message' => 'Test payment endpoint working',

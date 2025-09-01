@@ -202,6 +202,32 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const updateProfile = async (name: string, email: string) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await axios.put('/api/auth/profile', {
+        name,
+        email
+      })
+
+      if (response.data.status === 'success') {
+        user.value = response.data.data.user
+        return { success: true, message: response.data.message }
+      } else {
+        setError(response.data.message || 'Profile update failed')
+        return { success: false, message: response.data.message }
+      }
+    } catch (err: any) {
+      const message = err.response?.data?.message || 'Profile update failed'
+      setError(message)
+      return { success: false, message }
+    } finally {
+      loading.value = false
+    }
+  }
+
   // Initialize axios defaults if token exists
   if (token.value) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
@@ -227,6 +253,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     forgotPassword,
     resetPassword,
+    updateProfile,
     checkAuth,
     setError,
     clearToken
