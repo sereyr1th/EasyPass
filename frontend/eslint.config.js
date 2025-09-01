@@ -2,6 +2,10 @@ import pluginVue from 'eslint-plugin-vue'
 import tsParser from '@typescript-eslint/parser'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import vueParser from 'vue-eslint-parser'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default [
   {
@@ -19,6 +23,9 @@ export default [
         parser: tsParser,
         extraFileExtensions: ['.vue'],
         sourceType: 'module',
+        // Disable project-aware linting for Vue files to avoid config issues
+        // tsconfigRootDir: __dirname,
+        // project: ['./tsconfig.app.json'],
       },
     },
   },
@@ -28,6 +35,8 @@ export default [
       parser: tsParser,
       parserOptions: {
         sourceType: 'module',
+        tsconfigRootDir: __dirname,
+        project: ['./tsconfig.app.json'],
       },
     },
     plugins: {

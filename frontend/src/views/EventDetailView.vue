@@ -6,28 +6,31 @@
           <span class="visually-hidden">Loading...</span>
         </div>
       </div>
-      
+
       <div v-else-if="event">
         <!-- Event Header -->
         <div class="card overflow-hidden mb-4">
           <div class="position-relative overflow-hidden" style="height: 400px;">
             <img
-              v-if="event.image_url"
+              v-if="event.image_url && !imageError"
               :src="event.image_url"
               :alt="event.title"
               class="w-100 h-100 object-fit-cover"
+              @error="onImageError"
+              @load="onImageLoad"
             />
             <div v-else class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary">
               <i class="bi bi-calendar-event display-1 text-muted"></i>
+              <small v-if="imageError" class="text-warning d-block mt-2">Image failed to load</small>
             </div>
           </div>
-          
+
           <div class="card-body">
             <div class="row">
               <div class="col-lg-8">
                 <h1 class="display-4 fw-bold text-light mb-4 professional-title">{{ event.title }}</h1>
                 <p class="lead text-muted mb-4">{{ event.description }}</p>
-                
+
                 <div class="row g-4 mb-4">
                   <div class="col-md-6">
                     <div class="mb-3">
@@ -35,19 +38,19 @@
                         <i class="bi bi-calendar-event me-3 text-primary fs-5"></i>
                         <span>{{ formatDate(event.event_date) }}</span>
                       </div>
-                      
+
                       <div class="d-flex align-items-center text-muted mb-2">
                         <i class="bi bi-geo-alt me-3 text-success fs-5"></i>
                         <span>{{ event.location }}</span>
                       </div>
-                      
+
                       <div class="d-flex align-items-center text-muted">
                         <i class="bi bi-bookmark me-3 text-info fs-5"></i>
                         <span>{{ event.category }}</span>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="col-md-6">
                     <div class="mb-3">
                       <div class="d-flex align-items-center text-muted mb-2">
@@ -56,7 +59,7 @@
                           {{ event.price > 0 ? `$${event.price}` : 'Free' }}
                         </span>
                       </div>
-                      
+
                       <div class="d-flex align-items-center text-muted">
                         <i class="bi bi-people me-3 text-warning fs-5"></i>
                         <span>{{ event.current_attendees }}/{{ event.max_attendees }} attendees</span>
@@ -65,12 +68,12 @@
                   </div>
                 </div>
               </div>
-              
+
               <div class="col-lg-4">
                 <div class="card">
                   <div class="card-body">
                     <h3 class="h5 fw-bold text-light mb-4 professional-title">Get Your Ticket</h3>
-                    
+
                     <div v-if="!authStore.isAuthenticated">
                       <p class="text-muted small mb-3">Please sign in to purchase tickets</p>
                       <RouterLink
@@ -81,15 +84,15 @@
                         Sign In to Purchase
                       </RouterLink>
                     </div>
-                    
+
                     <div v-else-if="event.status !== 'active'" class="text-center">
                       <p class="text-danger">This event is no longer available</p>
                     </div>
-                    
+
                     <div v-else-if="event.current_attendees >= event.max_attendees" class="text-center">
                       <p class="text-warning">This event is sold out</p>
                     </div>
-                    
+
                     <div v-else>
                       <!-- Price Display -->
                       <div class="price-display text-center mb-4">
@@ -98,7 +101,7 @@
                           ${{ event.price || '0.00' }}
                         </div>
                       </div>
-                      
+
                       <!-- Modern Purchase Button -->
                       <button
                         @click="showPaymentModal = true"
@@ -115,7 +118,7 @@
                         </div>
                         <div class="btn-purchase-glow position-absolute top-0 start-0 w-100 h-100"></div>
                       </button>
-                      
+
                       <!-- Security Features -->
                       <div class="security-features">
                         <div class="d-flex align-items-center justify-content-center text-muted small mb-3">
@@ -132,7 +135,7 @@
                             <span>Stripe</span>
                           </div>
                         </div>
-                        
+
                         <div class="trust-badges d-flex align-items-center justify-content-center">
                           <div class="trust-badge me-2">
                             <i class="bi bi-credit-card text-primary"></i>
@@ -153,7 +156,7 @@
           </div>
         </div>
       </div>
-      
+
       <div v-else class="text-center py-5">
         <i class="bi bi-calendar-x display-1 text-muted mb-4"></i>
         <h2 class="h4 fw-bold text-muted mb-3 professional-title">Event Not Found</h2>
@@ -172,7 +175,7 @@
       style="z-index: 1060; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);"
       @click="closePaymentModal"
     >
-      <div 
+      <div
         class="payment-container position-relative w-100 h-100 overflow-auto"
         @click.stop
         style="max-width: 1200px; padding: 20px;"
@@ -185,7 +188,7 @@
         >
           <i class="bi bi-x-lg text-white fs-4"></i>
         </button>
-        
+
         <!-- Payment Content -->
         <div class="payment-content">
           <StripePayment
@@ -202,22 +205,20 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter, RouterLink } from 'vue-router'
+import { useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useEventsStore, type Event } from '@/stores/events'
-import { useTicketsStore } from '@/stores/tickets'
 import StripePayment from '@/components/payment/StripePayment.vue'
 
 const route = useRoute()
-const router = useRouter()
 const authStore = useAuthStore()
 const eventsStore = useEventsStore()
-const ticketsStore = useTicketsStore()
 
 const loading = ref(true)
 const purchasing = ref(false)
 const event = ref<Event | null>(null)
 const showPaymentModal = ref(false)
+const imageError = ref(false)
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -231,28 +232,33 @@ const formatDate = (dateString: string) => {
   }).format(date)
 }
 
-const handlePaymentSuccess = (ticket: any) => {
-  showPaymentModal.value = false
-  router.push('/tickets')
-}
-
 const closePaymentModal = () => {
   showPaymentModal.value = false
 }
 
-const onPaymentSuccess = (data: any) => {
+const onPaymentSuccess = () => {
   // The success UI is handled by the StripePayment component
   // Modal will be closed when user clicks "View My Ticket" or "Continue"
+}
+
+const onImageError = () => {
+  console.error('Failed to load image:', event.value?.image_url)
+  imageError.value = true
+}
+
+const onImageLoad = () => {
+  console.log('Image loaded successfully:', event.value?.image_url)
+  imageError.value = false
 }
 
 onMounted(async () => {
   const eventId = route.params.id as string
   const result = await eventsStore.fetchEvent(parseInt(eventId))
-  
+
   if (result.success) {
     event.value = result.data
   }
-  
+
   loading.value = false
 })
 </script>
@@ -385,7 +391,7 @@ onMounted(async () => {
   .payment-container {
     padding: 10px !important;
   }
-  
+
   .btn-close-modern {
     top: 15px !important;
     right: 15px !important;

@@ -43,14 +43,19 @@ class Event extends Model
         if (!$value) {
             return null;
         }
-        
+
         // If it's already a full URL, return as is
         if (str_starts_with($value, 'http')) {
             return $value;
         }
-        
-        // If it's a relative path, make it a full URL
-        return config('app.url') . $value;
+
+        // If it starts with /storage/, it's already a proper storage URL
+        if (str_starts_with($value, '/storage/')) {
+            return config('app.url') . $value;
+        }
+
+        // If it's just a filename or relative path, construct the full storage URL
+        return config('app.url') . '/storage/' . ltrim($value, '/');
     }
 
     /**
@@ -82,7 +87,7 @@ class Event extends Model
      */
     public function isAvailable(): bool
     {
-        return $this->status === 'active' && 
+        return $this->status === 'active' &&
                $this->current_attendees < $this->max_attendees &&
                $this->registration_deadline > now();
     }

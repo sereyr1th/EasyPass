@@ -3,16 +3,19 @@
     <!-- Event Image -->
     <div class="position-relative overflow-hidden" style="height: 200px;">
       <img
-        v-if="event.image_url"
+        v-if="event.image_url && !imageError"
         :src="event.image_url"
         :alt="event.title"
         class="card-img-top w-100 h-100 object-fit-cover"
         style="transition: transform 0.3s ease;"
+        @error="onImageError"
+        @load="onImageLoad"
       />
       <div v-else class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary">
         <i class="bi bi-calendar-event display-3 text-muted"></i>
+        <small v-if="imageError" class="text-warning d-block mt-2">Image failed to load</small>
       </div>
-      
+
       <!-- Event Status Badge -->
       <div class="position-absolute top-0 start-0 m-3">
         <span
@@ -57,12 +60,12 @@
       </div>
 
       <!-- Title -->
-      <h5 class="card-title fw-bold text-light mb-3 professional-title" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+      <h5 class="card-title fw-bold text-light mb-3 professional-title" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
         {{ event.title }}
       </h5>
 
       <!-- Description -->
-      <p class="card-text text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+      <p class="card-text text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
         {{ event.description }}
       </p>
 
@@ -100,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import type { Event } from '@/stores/events'
 
@@ -110,11 +113,13 @@ interface Props {
 
 const props = defineProps<Props>()
 
+const imageError = ref(false)
+
 const isAvailable = computed(() => {
   const now = new Date()
   const eventDate = new Date(props.event.event_date)
   const registrationDeadline = new Date(props.event.registration_deadline)
-  
+
   return (
     props.event.status === 'active' &&
     props.event.current_attendees < props.event.max_attendees &&
@@ -133,6 +138,16 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit'
   }).format(date)
+}
+
+const onImageError = () => {
+  console.error('Failed to load image:', props.event.image_url)
+  imageError.value = true
+}
+
+const onImageLoad = () => {
+  console.log('Image loaded successfully:', props.event.image_url)
+  imageError.value = false
 }
 </script>
 
