@@ -89,6 +89,14 @@
                       <p class="text-danger">This event is no longer available</p>
                     </div>
 
+                    <div v-else-if="isEventPassed" class="text-center">
+                      <p class="text-muted">This event has already ended</p>
+                    </div>
+
+                    <div v-else-if="isRegistrationClosed" class="text-center">
+                      <p class="text-warning">Registration deadline has passed</p>
+                    </div>
+
                     <div v-else-if="event.current_attendees >= event.max_attendees" class="text-center">
                       <p class="text-warning">This event is sold out</p>
                     </div>
@@ -204,7 +212,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useEventsStore, type Event } from '@/stores/events'
@@ -219,6 +227,22 @@ const purchasing = ref(false)
 const event = ref<Event | null>(null)
 const showPaymentModal = ref(false)
 const imageError = ref(false)
+
+const isEventPassed = computed(() => {
+  if (!event.value) return false
+  const now = new Date()
+  const eventDate = new Date(event.value.event_date)
+  return eventDate <= now
+})
+
+const isRegistrationClosed = computed(() => {
+  if (!event.value) return false
+  const now = new Date()
+  const registrationDeadline = new Date(event.value.registration_deadline)
+  const eventDate = new Date(event.value.event_date)
+  
+  return registrationDeadline <= now && eventDate > now && event.value.current_attendees < event.value.max_attendees
+})
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)

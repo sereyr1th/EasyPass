@@ -25,10 +25,22 @@
           Available
         </span>
         <span
-          v-else-if="event.status === 'active' && !isAvailable"
+          v-else-if="event.status === 'active' && isFull"
           class="badge bg-warning text-dark"
         >
           Full
+        </span>
+        <span
+          v-else-if="event.status === 'active' && isRegistrationClosed"
+          class="badge bg-danger"
+        >
+          Registration Closed
+        </span>
+        <span
+          v-else-if="event.status === 'active' && isEventPassed"
+          class="badge bg-secondary"
+        >
+          Event Ended
         </span>
         <span
           v-else-if="event.status === 'cancelled'"
@@ -126,6 +138,25 @@ const isAvailable = computed(() => {
     registrationDeadline > now &&
     eventDate > now
   )
+})
+
+const isFull = computed(() => {
+  return props.event.current_attendees >= props.event.max_attendees
+})
+
+const isRegistrationClosed = computed(() => {
+  const now = new Date()
+  const registrationDeadline = new Date(props.event.registration_deadline)
+  const eventDate = new Date(props.event.event_date)
+  
+  return registrationDeadline <= now && eventDate > now && props.event.current_attendees < props.event.max_attendees
+})
+
+const isEventPassed = computed(() => {
+  const now = new Date()
+  const eventDate = new Date(props.event.event_date)
+  
+  return eventDate <= now
 })
 
 const formatDate = (dateString: string) => {
